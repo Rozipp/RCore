@@ -1,0 +1,38 @@
+server_locale: ru_RU
+loger_level: ALL
+
+# Конфигурация подключения к БД
+database:
+  # Тип используемой базы данных
+  # Поддерживаемые: [sqlite, h2, mysql, postgresql]
+  type: mysql
+
+  # Конфигурация подключения к MySQL
+  mysql:
+    host: localhost
+    port: 3306
+    database: rcore
+    username: root
+    password: rcore
+    params:
+      - 'autoReconnect=true'
+      - 'useSSL=false'
+
+  # Конфигурация подключения к PostgreSQL
+  postgresql:
+    host: localhost
+    port: 5432
+    database: rcore
+    username: admin
+    password: rcore
+    params:
+      - 'autoReconnect=true'
+      - 'useSSL=false'
+
+  # Конфигурация подключения к H2
+  h2:
+    file: database
+
+  # Конфигурация подключения к SQLite
+  sqlite:
+    file: database.db

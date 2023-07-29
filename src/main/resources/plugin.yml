@@ -1,0 +1,5 @@
+name: RCore
+version: '${version}'
+main: ua.rozipp.core.RCore
+api-version: 1.16
+depend: [NBTAPI]
