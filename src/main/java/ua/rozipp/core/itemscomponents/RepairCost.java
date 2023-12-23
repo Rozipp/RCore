@@ -5,11 +5,20 @@ import ua.rozipp.core.exception.InvalidConfiguration;
 
 public class RepairCost extends ItemComponent {
 
-    private final double repairCostValue;
+    private double repairCostValue;
 
-    public RepairCost(RConfig compInfo) throws InvalidConfiguration {
-        super(compInfo);
-        repairCostValue = compInfo.getDouble("value", 1.0, null);
+    public RepairCost() {
+        super();
+    }
+
+    public RepairCost(double repairCostValue) {
+        super();
+        this.repairCostValue = repairCostValue;
+    }
+
+    @Override
+    protected void load(RConfig rConfig) throws InvalidConfiguration {
+        repairCostValue = rConfig.getDouble("value", 1.0, null);
     }
 
 }

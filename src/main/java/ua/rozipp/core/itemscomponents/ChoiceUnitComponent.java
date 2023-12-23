@@ -3,17 +3,14 @@ package ua.rozipp.core.itemscomponents;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
-import ua.rozipp.core.config.RConfig;
-import ua.rozipp.core.exception.InvalidConfiguration;
 import ua.rozipp.core.items.ItemStackBuilder;
 
 public class ChoiceUnitComponent extends ItemComponent {
-	public ChoiceUnitComponent(RConfig compInfo) throws InvalidConfiguration {
-		super(compInfo);
+	public ChoiceUnitComponent() {
 	}
 
 	@Override
-	public void onPrepareCreate(ItemStackBuilder builder) {
+	public void onSpawnItem(ItemStackBuilder builder) {
 		builder.addLore("<Нажми для выбора>");
 	}
 

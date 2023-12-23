@@ -17,22 +17,32 @@ import ua.rozipp.core.items.AttributeModifierBuilder;
 import ua.rozipp.core.items.ItemStackBuilder;
 
 public class Attack extends ItemComponent {
-	private final double damageValue;
 
-	public Attack(RConfig compInfo) throws InvalidConfiguration {
-		super(compInfo);
-		this.damageValue = compInfo.getDouble("value", 1.0, null);
+	private double damageValue;
+
+	public Attack() {
+		super();
+	}
+
+	public Attack(double damageValue) {
+		super();
+		this.damageValue = damageValue;
 	}
 
 	@Override
-	public void onPrepareCreate(ItemStackBuilder builder) {
+	protected void load(RConfig rConfig) throws InvalidConfiguration {
+		this.damageValue = rConfig.getDouble("value", 1.0, null);
+	}
+
+	@Override
+	public void onSpawnItem(ItemStackBuilder builder) {
 		// Add generic attack damage to 0 to clear the default lore on item.
 		builder.addAttribute(Attribute.GENERIC_ATTACK_DAMAGE,
 				AttributeModifierBuilder.newBuilder()
-				.name("Attack").amount(0).build());
+						.name("Attack").amount(0).build());
 		builder.addLore(Component.text(damageValue)
 				.append(Component.space())
-				.append(Component.translatable("itemLore_Attack"))
+				.append(Component.translatable("item.component.lore.attack"))
 				.color(NamedTextColor.BLUE));
 	}
 

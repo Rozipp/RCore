@@ -40,7 +40,7 @@ public abstract class CustomMenuCommand extends CustomCommand {
                 try {
                     int index = Integer.parseInt(newcomm);
                     if (index < 0 || index >= subCommands.size())
-                        throw new ComponentException("Недопустимый индекс команды");
+                        throw new ComponentException(Component.translatable("cmd.error.indexOfBound").args(Component.text(subCommands.size())));
                     CustomCommand cc = subCommands.get(index);
                     cc.onCommand(sender, label + " " + cc.getString_cmd(), newargs);
                     finished = true;
@@ -60,7 +60,7 @@ public abstract class CustomMenuCommand extends CustomCommand {
                         }
                     }
                     if (!finished)
-                        throw new ComponentException("Command not found");
+                        throw new ComponentException(Component.translatable("cmd.error.commandNotFound"));
                 }
             }
         });
@@ -75,6 +75,7 @@ public abstract class CustomMenuCommand extends CustomCommand {
     }
 
     public void add(CustomCommand menu) {
+        menu.setParentCommand(this);
         this.subCommands.add(menu);
     }
 
@@ -84,7 +85,7 @@ public abstract class CustomMenuCommand extends CustomCommand {
     }
 
     public void showBasicHelp(CommandSender sender) {
-        MessageHelper.send(sender, Component.translatable("cmd_CommandHelpTitle", NamedTextColor.LIGHT_PURPLE).args(displayName.color(NamedTextColor.GOLD)));
+//        MessageHelper.send(sender, Component.translatable("cmd.CommandHelpTitle", NamedTextColor.LIGHT_PURPLE).args(displayName.color(NamedTextColor.GOLD)));
         MessageHelper.send(sender, Component.text("------- /", NamedTextColor.LIGHT_PURPLE)
                 .append(Component.text(getString_cmd(), NamedTextColor.GREEN, TextDecoration.BOLD))
                 .append(Component.text(" help -------", NamedTextColor.LIGHT_PURPLE)));
@@ -92,7 +93,7 @@ public abstract class CustomMenuCommand extends CustomCommand {
         for (int i = 0; i < subCommands.size(); i++) {
             CustomCommand command = subCommands.get(i);
             try {
-                command.valide(sender);
+                command.valid(sender);
             } catch (ComponentException e) {
                 continue;
             }
@@ -103,7 +104,7 @@ public abstract class CustomMenuCommand extends CustomCommand {
             if (command.getAliases() != null) for (String s : command.getAliases())
                 altComms.append(" (").append(s).append(")");
 
-            sender.sendMessage(Component.text(StringUtils.addTabToString(nomer, 3), NamedTextColor.GREEN)
+            MessageHelper.send(sender, Component.text(StringUtils.addTabToString(nomer, 3), NamedTextColor.GREEN)
                     .append(Component.text(StringUtils.addTabToString(command.getString_cmd() + altComms, 12), NamedTextColor.LIGHT_PURPLE))
                     .append(command.getDescription()));
         }
@@ -154,7 +155,7 @@ public abstract class CustomMenuCommand extends CustomCommand {
             List<String> tabList = new ArrayList<>();
             for (CustomCommand command : perent.getSubCommands()) {
                 try {
-                    command.valide(sender);
+                    command.valid(sender);
                 } catch (ComponentException e) {
                     continue;
                 }

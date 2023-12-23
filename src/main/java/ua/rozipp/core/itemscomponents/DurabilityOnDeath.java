@@ -4,20 +4,29 @@ import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.inventory.ItemStack;
 import ua.rozipp.core.config.RConfig;
 import ua.rozipp.core.exception.InvalidConfiguration;
-import ua.rozipp.core.items.ItemStackBuilder;
 import ua.rozipp.core.items.ItemChangeResult;
+import ua.rozipp.core.items.ItemStackBuilder;
 
 public class DurabilityOnDeath extends ItemComponent {
 
-    private final double percentValue;
+    private double percentValue;
 
-    public DurabilityOnDeath(RConfig compInfo) throws InvalidConfiguration {
-        super(compInfo);
-        percentValue = compInfo.getDouble("value", 0.0, null);
+    public DurabilityOnDeath() {
+        super();
+    }
+
+    public DurabilityOnDeath(double percentValue) {
+        super();
+        this.percentValue = percentValue;
     }
 
     @Override
-    public void onPrepareCreate(ItemStackBuilder builder) {
+    protected void load(RConfig rConfig) throws InvalidConfiguration {
+        percentValue = rConfig.getDouble("value", 0.0, null);
+    }
+
+    @Override
+    public void onSpawnItem(ItemStackBuilder builder) {
 //		attrs.addLore(CivColor.Blue+""+this.getDouble("value")+" Durability");
     }
 

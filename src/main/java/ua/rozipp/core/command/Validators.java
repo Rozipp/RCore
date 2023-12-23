@@ -12,7 +12,7 @@ public class Validators {
         if (!(sender instanceof ConsoleCommandSender)) {
             Player player = CustomCommand.getPlayer(sender);
             if (!player.isOp()) {
-                throw new ComponentException(Component.translatable("cmd_mustBeOnlyAdmin"));
+                throw new ComponentException(Component.translatable("cmd.error.mustBeOnlyAdmin"));
             }
         }
     };

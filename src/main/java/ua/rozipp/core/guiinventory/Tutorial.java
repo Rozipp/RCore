@@ -3,19 +3,18 @@ package ua.rozipp.core.guiinventory;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
+import org.bukkit.plugin.Plugin;
 import ua.rozipp.core.exception.GuiException;
-import ua.rozipp.core.gui.GuiInventory;
-import ua.rozipp.core.gui.GuiItemBuilder;
+import ua.rozipp.core.gui.InventoryGUI;
 
-public class Tutorial extends GuiInventory {
+public class Tutorial extends InventoryGUI {
 
-	public Tutorial(Player player, String arg) throws GuiException {
-		super(player, null, arg);
-		this.setRow(3);
-		this.name(Component.translatable("tutorial_gui_heading"));
-
+	public Tutorial(Plugin plugin, Player player, String arg) throws GuiException {
+		super(plugin, Bukkit.createInventory(null, 3 * 9, Component.translatable("tutorial_gui_heading")));
+/*
 		this.addGuiItem(0, GuiItemBuilder.guiItemBuilder(Material.LEGACY_WORKBENCH)//
 				.name(Component.translatable("tutorial_workbench_heading", NamedTextColor.BLUE, TextDecoration.BOLD))//
 				.addLore(Component.translatable("tutorial_workbench_Line1"), //
@@ -110,7 +109,7 @@ public class Tutorial extends GuiInventory {
 						Component.translatable("tutorial_needRecipe_Line3"), //
 						Component.translatable("tutorial_needRecipe_Line4"), //
 						Component.translatable("tutorial_needRecipe_Line5"))
-				.build());
+				.build());*/
 
 //		this.addGuiItem(19, GuiItemBuilder.guiItemBuilder(CraftingHelpRecipe.getInfoBookForItem("mat_found_civ"))//
 //				.setOpenInventory(CraftingHelpRecipe.class, "mat_found_civ").build());

@@ -6,7 +6,7 @@ import net.kyori.adventure.text.format.NamedTextColor;
 public class AttackEnchantment extends CustomEnchantment {
 
 	public AttackEnchantment() {
-		super( "attack", Component.translatable("itemLore_Attack"), ItemSet.ALLWEAPONS, 100, null);
+		super( "attack", Component.translatable("item.enchantment.lore.attack"), ItemSet.ALLWEAPONS, 100, null);
 	}
 
 	@Override

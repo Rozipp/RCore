@@ -5,23 +5,20 @@ import net.kyori.adventure.translation.TranslationRegistry;
 import net.kyori.adventure.translation.Translator;
 import org.bukkit.NamespacedKey;
 import org.bukkit.plugin.Plugin;
-import ua.rozipp.core.config.RConfigFile;
+import ua.rozipp.core.config.RConfig;
+import ua.rozipp.core.exception.InvalidConfiguration;
 
-import java.io.File;
 import java.text.MessageFormat;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Locale;
 
 public class LocaleHelper {
 
     private static Locale serverLocale = Locale.US;
-    private static final Map<String, Locale> usingLocales = new HashMap<>();
 
-    public static void registerPluginsLocaleFiles(Plugin plugin) {
-        String serverLocaleName = plugin.getConfig().getString("server_locale", "ru_ru");
-        if (!serverLocaleName.isEmpty()) LocaleHelper.setServerLocaleName(serverLocaleName);
-
-        LocaleHelper.foundLocaleFiles(plugin);
-        LocaleHelper.loadLocaleFile(plugin);
+    public static void initServerLocale(Plugin plugin) {
+        String serverLocaleName = plugin.getConfig().getString("server_locale");
+        if (serverLocaleName != null && !serverLocaleName.isEmpty()) LocaleHelper.setServerLocaleName(serverLocaleName);
     }
 
     static public Locale getServerLocale() {
@@ -31,18 +28,13 @@ public class LocaleHelper {
     public static void setServerLocaleName(String languageTag) {
         serverLocale = forLanguageTag(languageTag);
         Locale.setDefault(serverLocale);
-        LogHelper.info("serverLocale set \"" + serverLocale.toLanguageTag() + "\"");
+        LogHelper.info("serverLocale set \"" + serverLocale + "\"");
     }
 
     public static Locale forLanguageTag(String languageTag) {
+        if (languageTag == null) return null;
         String clearLanguageTag = languageTag.replace("_", "-");
-        if (usingLocales.containsKey(clearLanguageTag))
-            return usingLocales.get(clearLanguageTag);
-        else {
-            Locale result = Locale.forLanguageTag(clearLanguageTag);
-            usingLocales.put(result.toLanguageTag(), result);
-            return result;
-        }
+        return Locale.forLanguageTag(clearLanguageTag);
     }
 
     public static String translate(String key) {
@@ -57,63 +49,52 @@ public class LocaleHelper {
         return translate(serverLocale, key, null);
     }
 
-    private static String translate(Locale locale, String key, String[] args) {
+    public static String translate(Locale locale, String key, String[] args) {
         MessageFormat mf = GlobalTranslator.get().translate(key, locale);
-        if (mf == null) {
-//            String languageTag = locale.toLanguageTag();
-//            saveToFileConfigure("locale" + File.separator + languageTag + ".yml", key, key);
-//            LogHelper.warning("Add new translatable key \"" + key + "\" in " + languageTag + " locale");
-            return "FIXME " + key;
-        }
+        if (mf == null)
+            return "FIXME [" + locale + "]: " + key + " " + Arrays.toString(args);
         return mf.format(args);
     }
 
-    public static void foundLocaleFiles(Plugin plugin) {
-        File localeFolder = new File(plugin.getDataFolder(), "locale/");
-        if (!localeFolder.exists()) {
-            if (!localeFolder.mkdirs()) return;
-        }
-
-        for (String fileName : Objects.requireNonNull(localeFolder.list())) {
-            String[] split = fileName.split("\\.");
-            if (split.length != 2 || !split[1].equals("yml")) {
-                LogHelper.info("Found file " + fileName + ", but it is not locale file.");
-                continue;
-            }
-            LogHelper.fine("Found locale file " + fileName);
-            forLanguageTag(split[0]);
-        }
-    }
-
-    public static void reloadLocaleFile(Plugin plugin) {
+    public static void reloadLocaleFile(Plugin plugin) throws InvalidConfiguration {
         try {
             for (Translator t : GlobalTranslator.get().sources())
-                if (t.name().namespace().equals(plugin.getName())) GlobalTranslator.get().removeSource(t);
-        } catch (Exception ignored) {
+                if (t.name().namespace().equals(plugin.getName()))
+                    GlobalTranslator.get().removeSource(t);
+        } catch (Exception e) {
+            LogHelper.error(e.getMessage());
         }
         loadLocaleFile(plugin);
     }
 
-    public static void loadLocaleFile(Plugin plugin) {
+    public static void loadLocaleFile(Plugin plugin) throws InvalidConfiguration {
         TranslationRegistry translator = TranslationRegistry.create(new NamespacedKey(plugin, "translator"));
-        for (String languageTag : usingLocales.keySet()) {
-            RConfigFile cfg = ConfigHelper.loadConfigFile(plugin, "locale/" + languageTag + ".yml");
+        for (RConfig config : PluginHelper.getRConfigMultiFiles(plugin).getRConfigList("locales")) {
+            try {
+                Locale locale = forLanguageTag(config.getString("locale"));
+                if (locale == null) continue;
+                addAll(translator, config, locale, "");
+            } catch (Exception e1) {
+                LogHelper.error(e1.getMessage());
+            }
+        }
 
-            Locale locale = usingLocales.get(languageTag);
+        GlobalTranslator.get().addSource(translator);
+    }
 
-            for (String key : cfg.getKeys(false)) {
-                if (key.isEmpty()) continue;
-                String format = cfg.getString(key);
-                if (format == null || format.isEmpty()) continue;
-                format = format
-                        .replace("[%0]", "{0}")
-                        .replace("[%1]", "{1}")
-                        .replace("[%2]", "{2}")
-                        .replace("[%3]", "{3}"); //фикс старых ключей
-                translator.register(key, locale, new MessageFormat(format, locale));
+    private static void addAll(TranslationRegistry translator, RConfig config, Locale locale, String root) {
+        for (String key : config.getKeys(false)) {
+            if (key.isEmpty() || key.equals("locale")) continue;
+            String abs_key = ((root.isEmpty()) ? "" : root + ".") + key;
+            String message = config.getString(key);
+            if (message == null || message.isEmpty()) {
+                RConfig rConfig = config.getRConfig(key);
+                if (rConfig != null) addAll(translator, rConfig, locale, abs_key);
+            } else {
                 try {
-                    GlobalTranslator.get().addSource(translator);
-                } catch (Exception ignored) {
+                    translator.register(abs_key, locale, new MessageFormat(message, locale));
+                } catch (Exception e) {
+                    LogHelper.error(e.getMessage());
                 }
             }
         }

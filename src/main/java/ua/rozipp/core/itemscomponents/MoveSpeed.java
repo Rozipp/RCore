@@ -8,15 +8,24 @@ import ua.rozipp.core.items.ItemStackBuilder;
 
 public class MoveSpeed extends ItemComponent {
 
-    private final double speedValue;
+    private double speedValue;
 
-    public MoveSpeed(RConfig compInfo) throws InvalidConfiguration {
-        super(compInfo);
-        speedValue = compInfo.getDouble("value", 1.0, null);
+    public MoveSpeed() {
+        super();
+    }
+
+    public MoveSpeed(double speedValue) {
+        super();
+        this.speedValue = speedValue;
     }
 
     @Override
-    public void onPrepareCreate(ItemStackBuilder builder) {
+    protected void load(RConfig rConfig) throws InvalidConfiguration {
+        speedValue = rConfig.getDouble("value", 1.0, null);
+    }
+
+    @Override
+    public void onSpawnItem(ItemStackBuilder builder) {
         builder.addAttribute(Attribute.GENERIC_MOVEMENT_SPEED,
                 AttributeModifierBuilder.newBuilder().name("Speed").
                         amount(speedValue).

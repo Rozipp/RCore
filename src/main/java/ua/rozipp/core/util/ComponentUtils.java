@@ -11,27 +11,27 @@ import java.util.Locale;
 
 public class ComponentUtils {
 
-    public static String componentedToString(Component component){
-        StringBuilder sb = new StringBuilder();
-        readComponent(sb, component, LocaleHelper.getServerLocale());
-        return sb.toString();
+    public static String componentToString(Component component) {
+        return componentToString(component, LocaleHelper.getServerLocale());
     }
 
-    public static String componentedToString(Component component, Locale locale){
+    public static String componentToString(Component component, Locale locale) {
         StringBuilder sb = new StringBuilder();
         readComponent(sb, component, locale);
         return sb.toString();
     }
 
-    private static StringBuilder readComponent(StringBuilder sb, Component component, Locale locale){
+    private static StringBuilder readComponent(StringBuilder sb, Component component, Locale locale) {
         if (component instanceof TextComponent)
             sb.append(((TextComponent) component).content());
-        if (component instanceof TranslatableComponent) {
-            TranslatableComponent tc = (TranslatableComponent) component;
-            List<String> arg = new ArrayList<>();
-            for (Component c : tc.args()) arg.add(componentedToString(c, locale));
+        else {
+            if (component instanceof TranslatableComponent) {
+                TranslatableComponent tc = (TranslatableComponent) component;
+                List<String> arg = new ArrayList<>();
+                for (Component c : tc.args()) arg.add(componentToString(c, locale));
 
-            sb.append(LocaleHelper.translate(tc.key(), arg.toArray(new String[0])));
+                sb.append(LocaleHelper.translate(locale, tc.key(), arg.toArray(new String[0])));
+            }
         }
         if (!component.children().isEmpty())
             for (Component c : component.children()) {
@@ -39,4 +39,32 @@ public class ComponentUtils {
             }
         return sb;
     }
+
+    public static Component translateComponent(Component component) {
+        return translateComponent(component, Locale.getDefault());
+    }
+
+    public static Component translateComponent(Component component, Locale locale) {
+        if (component instanceof TranslatableComponent) {
+            TranslatableComponent tc = (TranslatableComponent) component;
+            List<String> arg = new ArrayList<>();
+            for (Component c : tc.args()) arg.add(componentToString(c, locale));
+
+            String s = LocaleHelper.translate(locale, tc.key(), arg.toArray(new String[0]));
+            Component result = Component.text(s, tc.style());
+            if (!component.children().isEmpty())
+                for (Component c : component.children()) {
+                    result = result.append(translateComponent(c, locale));
+                }
+            return result;
+        } else {
+            List<Component> list = new ArrayList<>();
+            if (!component.children().isEmpty())
+                for (Component c : component.children()) {
+                    list.add(translateComponent(c, locale));
+                }
+            return (list.isEmpty()) ? component : component.children(list);
+        }
+    }
+
 }

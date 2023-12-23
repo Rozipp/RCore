@@ -8,7 +8,7 @@ public class DefenseEnchantment extends CustomEnchantment {
 	public static Double defensePerLevel = 1.0;
 
 	public DefenseEnchantment() {
-		super("defense", Component.translatable("itemLore_Defense"), ItemSet.ARMOR, 100, null);
+		super("defense", Component.translatable("item.enchantment.lore.defense"), ItemSet.ARMOR, 100, null);
 	}
 
 	public Component getDisplayName(int level) {

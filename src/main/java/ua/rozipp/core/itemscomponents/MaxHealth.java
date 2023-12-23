@@ -3,19 +3,28 @@ package ua.rozipp.core.itemscomponents;
 import org.bukkit.attribute.Attribute;
 import ua.rozipp.core.config.RConfig;
 import ua.rozipp.core.exception.InvalidConfiguration;
-import ua.rozipp.core.items.ItemStackBuilder;
 import ua.rozipp.core.items.AttributeModifierBuilder;
+import ua.rozipp.core.items.ItemStackBuilder;
 
 public class MaxHealth extends ItemComponent {
-    private final double healthValue;
+    private double healthValue;
 
-    public MaxHealth(RConfig compInfo) throws InvalidConfiguration {
-        super(compInfo);
-        healthValue = compInfo.getDouble("value", 1.0, null);
+    public MaxHealth() {
+        super();
+    }
+
+    public MaxHealth(double healthValue) {
+        super();
+        this.healthValue = healthValue;
     }
 
     @Override
-    public void onPrepareCreate(ItemStackBuilder builder) {
+    protected void load(RConfig rConfig) throws InvalidConfiguration {
+        healthValue = rConfig.getDouble("value", 1.0, null);
+    }
+
+    @Override
+    public void onSpawnItem(ItemStackBuilder builder) {
         builder.addAttribute(Attribute.GENERIC_MAX_HEALTH,
                 AttributeModifierBuilder.newBuilder().name("Health").
                         amount(healthValue).

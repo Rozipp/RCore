@@ -26,7 +26,7 @@ public class ShapelessCustomRecipe extends CustomRecipe {
     public Recipe buildRecipes(Plugin plugin) {
         /* Loads in materials from configuration file. */
         ItemStack resultStack = ItemHelper.createItemStack(umid, craftAmount);
-
+//        if (resultStack.getType().isAir())
         ShapelessRecipe recipe = new ShapelessRecipe(key, resultStack);
         for (ShapelessIngredient ingred : this.ingredients.values()) {
             recipe.addIngredient(ingred.count, ItemHelper.createItemStack(ingred.umid, ingred.count));

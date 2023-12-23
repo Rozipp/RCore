@@ -4,7 +4,7 @@ import net.kyori.adventure.text.Component;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.inventory.ItemStack;
-import redempt.redlib.misc.Task;
+import ua.rozipp.core.Task;
 import ua.rozipp.core.PluginHelper;
 import ua.rozipp.core.RCore;
 

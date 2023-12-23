@@ -1,8 +1,11 @@
 package ua.rozipp.core.util;
 
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.util.Vector;
-import redempt.redlib.misc.Task;
+import ua.rozipp.core.RCore;
 
 import java.util.function.Consumer;
 
@@ -40,15 +43,17 @@ public class LinearMovement {
         return location.clone().add(direction.getX() * dt, direction.getY() * dt, direction.getZ() * dt); //умножаем вектор скорости на dt
     }
 
-    private Task task;
-
     public void beginDrawNow() {
         this.begin = TimeUtils.now();
-        task = Task.syncRepeating(() -> {
-            time = TimeUtils.now();
-            if (time - begin > lifeTime) task.cancel();
-            consumer.accept(nextLocation());
-        }, 1, 1);
+        BukkitRunnable task = new BukkitRunnable() {
+            @Override
+            public void run() {
+                time = TimeUtils.now();
+                if (time - begin > lifeTime) this.cancel();
+                consumer.accept(nextLocation());
+            }
+        };
+        task.runTaskTimer(RCore.getInstance(), 1, 1);
     }
 
 }

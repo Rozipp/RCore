@@ -62,19 +62,19 @@ public class CustomEnchantment {
 	public static CustomEnchantment VANISHING_CURSE = new VanillaEnchantment(Enchantment.VANISHING_CURSE, ItemSet.ALL, 1);
 
 	public static CustomEnchantment Attack = new AttackEnchantment();
-	public static CustomEnchantment BuyItem = new CustomEnchantment("buy_item", Component.translatable("itemLore_Buy"), ItemSet.NONE, 1, null);
+	public static CustomEnchantment BuyItem = new CustomEnchantment("buy_item", Component.translatable("item.enchantment.lore.buy"), ItemSet.NONE, 1, null);
 	public static CustomEnchantment Critical = new CriticalEnchantment();
 	public static CustomEnchantment Defense = new DefenseEnchantment();
-	public static CustomEnchantment Evrei = new CustomEnchantment("evrei", Component.translatable("itemLore_evrei"), ItemSet.NONE, 1, null);
-	public static CustomEnchantment Jumping = new CustomEnchantment("jumping", Component.text("Прыгучесть"), ItemSet.LEGGINGS, 100, null);
-	public static CustomEnchantment NoRepair = new CustomEnchantment("norepair", Component.translatable("itemLore_noRepair"), ItemSet.NONE, 1, null);
-	public static CustomEnchantment NoTech = new CustomEnchantment("notech", Component.translatable("itemLore_noTech"), ItemSet.NONE, 1, null);
+	public static CustomEnchantment Evrei = new CustomEnchantment("evrei", Component.translatable("item.enchantment.lore.evrei"), ItemSet.NONE, 1, null);
+	public static CustomEnchantment Jumping = new CustomEnchantment("jumping", Component.translatable("item.enchantment.lore.jumping"), ItemSet.LEGGINGS, 100, null);
+	public static CustomEnchantment NoRepair = new CustomEnchantment("norepair", Component.translatable("item.enchantment.lore.noRepair"), ItemSet.NONE, 1, null);
+	public static CustomEnchantment NoTech = new CustomEnchantment("notech", Component.translatable("item.enchantment.lore.noTech"), ItemSet.NONE, 1, null);
 	public static CustomEnchantment Poison = new PoisonEnchantment();
-	public static CustomEnchantment SoulBound = new CustomEnchantment("soulbound", Component.translatable("itemLore_Soulbound"), ItemSet.ALL, 1, null);
+	public static CustomEnchantment SoulBound = new CustomEnchantment("soulbound", Component.translatable("item.enchantment.lore.soulbound"), ItemSet.ALL, 1, null);
 	public static CustomEnchantment Speed = new SpeedEnchantment();
-	public static CustomEnchantment TechOnly = new CustomEnchantment("techonly", Component.translatable("itemLore_techOnly").color(NamedTextColor.GRAY).decorate(TextDecoration.BOLD), ItemSet.NONE, 1, null);
-	public static CustomEnchantment Thorns = new CustomEnchantment( "recoil", Component.text("Отдача").color(NamedTextColor.BLUE), ItemSet.CHESTPLATES, 5, null);
-	public static CustomEnchantment UnitItem = new CustomEnchantment( "unit_item", Component.text("Предмет юнита").color(NamedTextColor.GOLD).decorate(TextDecoration.BOLD), ItemSet.NONE, 1, null);
+	public static CustomEnchantment TechOnly = new CustomEnchantment("techonly", Component.translatable("item.enchantment.lore.techOnly").color(NamedTextColor.GRAY).decorate(TextDecoration.BOLD), ItemSet.NONE, 1, null);
+	public static CustomEnchantment Thorns = new CustomEnchantment( "recoil", Component.translatable("item.enchantment.lore.recoil").color(NamedTextColor.BLUE), ItemSet.CHESTPLATES, 5, null);
+	public static CustomEnchantment UnitItem = new CustomEnchantment( "unit_item", Component.translatable("item.enchantment.lore.unit_item").color(NamedTextColor.GOLD).decorate(TextDecoration.BOLD), ItemSet.NONE, 1, null);
 
 	protected Enchantment enchantment;
 	protected Component displayName;

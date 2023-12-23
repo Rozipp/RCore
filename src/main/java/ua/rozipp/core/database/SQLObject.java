@@ -82,6 +82,10 @@ public abstract class SQLObject<T, ID> {
         this.dao = dao;
     }
 
+    public void postLoad(Dao<T, ID> dao){
+        setDao(dao);
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

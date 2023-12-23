@@ -14,18 +14,27 @@ import ua.rozipp.core.items.CustomMaterial;
 import ua.rozipp.core.items.ItemStackBuilder;
 
 public class Defense extends ItemComponent {
-    private final double defValue;
+    private double defValue;
 
-    public Defense(RConfig compInfo) throws InvalidConfiguration {
-        super(compInfo);
-        defValue = compInfo.getDouble("value", 1.0, null);
+    public Defense() {
+        super();
+    }
+
+    public Defense(double defValue) {
+        super();
+        this.defValue = defValue;
     }
 
     @Override
-    public void onPrepareCreate(ItemStackBuilder builder) {
+    protected void load(RConfig rConfig) throws InvalidConfiguration {
+        defValue = rConfig.getDouble("value", 1.0, null);
+    }
+
+    @Override
+    public void onSpawnItem(ItemStackBuilder builder) {
         builder.addLore(Component.text(defValue)
                 .append(Component.space())
-                .append(Component.translatable("newItemLore_Defense"))
+                .append(Component.translatable("item.component.lore.defense"))
                 .color(NamedTextColor.BLUE));
     }
 

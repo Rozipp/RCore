@@ -2,18 +2,15 @@ package ua.rozipp.core.itemscomponents;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
-import ua.rozipp.core.config.RConfig;
-import ua.rozipp.core.exception.InvalidConfiguration;
-import ua.rozipp.core.items.ComponentedCustomMaterial;
-import ua.rozipp.core.items.CustomMaterial;
-import ua.rozipp.core.items.ItemStackBuilder;
-import ua.rozipp.core.items.ItemHelper;
 import org.bukkit.inventory.ItemStack;
+import ua.rozipp.core.items.CustomMaterial;
+import ua.rozipp.core.items.ItemHelper;
+import ua.rozipp.core.items.ItemStackBuilder;
 
 public class Tagged extends ItemComponent {
 
-	public Tagged(RConfig compInfo) throws InvalidConfiguration {
-		super(compInfo);
+	public Tagged() {
+		super();
 	}
 
 	public ItemStack addTag(ItemStack src, String tag) {
@@ -34,10 +31,9 @@ public class Tagged extends ItemComponent {
 			if (!ItemHelper.isPresent(stack)) continue;
 
 			CustomMaterial cMat = CustomMaterial.getCustomMaterial(stack);
-			if (!(cMat instanceof ComponentedCustomMaterial)) return null;
-			ComponentedCustomMaterial compMat= (ComponentedCustomMaterial) cMat;
+			if (cMat == null) return null;
 
-			Tagged tagged = compMat.getComponent(Tagged.class);
+			Tagged tagged = cMat.getComponent(Tagged.class);
 			if (tagged == null) return null;
 
 			if (tag == null) {

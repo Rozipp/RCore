@@ -5,13 +5,13 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.title.Title;
+import net.kyori.adventure.translation.GlobalTranslator;
+import org.bukkit.ChatColor;
+import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 public class MessageHelper {
 
@@ -46,7 +46,7 @@ public class MessageHelper {
 			Player player = (Player) sender;
 			lastErrorMessage.put(player.getUniqueId(), message.hashCode());
 		}
-		send(sender, convertColorStringToComponentText(message));
+		send(sender, ChatColor.RED + message);
 	}
 
 	/**Сообщение об ошибке. Окрашивает сообщение в красный цвет*/
@@ -61,7 +61,7 @@ public class MessageHelper {
 	/**Сообщение об удачном выполнение операции*/
 	@Deprecated
 	public static void sendSuccess(Audience sender, String message) {
-		sendSuccess(sender, convertColorStringToComponentText(message));
+		send(sender, ChatColor.GREEN + message);
 	}
 	/**Сообщение об удачном выполнение операции*/
 	public static void sendSuccess(Audience sender, Component message) {
@@ -75,19 +75,25 @@ public class MessageHelper {
 
 	@Deprecated
 	public static void send(Audience sender, @NotNull String line) {
-		send(sender, convertColorStringToComponentText(line));
+		if (sender instanceof Player)
+			((Player) sender).sendMessage(line);
+		else if (sender instanceof ConsoleCommandSender)
+			((ConsoleCommandSender) sender).sendMessage(line);
+		else send(sender, convertColorStringToComponentText(line));
 	}
 
 	public static void send(Audience sender, @NotNull Component line) {
-		if (sender != null) sender.sendMessage(line);
+		if (sender == null) return;
+		if (sender instanceof ConsoleCommandSender) {
+			sender.sendMessage(GlobalTranslator.render(line, Locale.getDefault()));
+		} else sender.sendMessage(line);
 	}
 
 	@Deprecated
 	public static void sendAsList(Audience sender, List<String> lines) {
 		TextComponent.Builder builder = Component.text();
 		for (int i = 0; i < lines.size() - 1; i++) {
-			builder.append(convertColorStringToComponentText(lines.get(i)))
-					.append(Component.text(", "));
+			builder.append(convertColorStringToComponentText(lines.get(i) + ", "));
 		}
 		builder.append(convertColorStringToComponentText(lines.get(lines.size() - 1)));
 		send(sender, builder.build());

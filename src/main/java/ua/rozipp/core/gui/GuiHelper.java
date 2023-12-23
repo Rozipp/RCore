@@ -2,60 +2,53 @@ package ua.rozipp.core.gui;
 
 import de.tr7zw.nbtapi.NBTCompound;
 import de.tr7zw.nbtapi.NBTItem;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import ua.rozipp.core.LogHelper;
-import ua.rozipp.core.gui.action.*;
 
+import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayDeque;
 import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 
 public class GuiHelper {
 
-    public static final String TAG_GUI = "GUI";
     public static final int INV_ROW_COUNT = 9;
-    public static final GuiAction CALLBACK_GUI = new CallbackGui();
-    public static final GuiAction OPEN_INVENTORY = new OpenInventory();
-    public static final GuiAction CLOSE_INVENTORY = new CloseInventory();
-    public static final GuiAction OPEN_BACK_INVENTORY = new OpenBackInventory();
-    public static final GuiAction CONFIRMATION = new Confirmation();
-    public static final GuiAction SPAWN_ITEM = new SpawnItem();
-    public static HashMap<String, GuiAction> guiActions = new HashMap<>();
+    static Map<UUID, ArrayDeque<InventoryGUI>> playersGuiInventoryStack = new HashMap<>();
 
-    static {
-        GuiHelper.addAction(CALLBACK_GUI);
-        GuiHelper.addAction(OPEN_INVENTORY);
-        GuiHelper.addAction(CLOSE_INVENTORY);
-        GuiHelper.addAction(OPEN_BACK_INVENTORY);
-        GuiHelper.addAction(CONFIRMATION);
-        GuiHelper.addAction(SPAWN_ITEM);
-        for (String key : guiActions.keySet())
-            LogHelper.debug(key);
+    private static InventoryGUI newGuiInventory(String id, Player player, Class<? extends InventoryGUI> cls, String arg) throws NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
+        Class<?>[] partypes = {Player.class, String.class};
+        Object[] arglist = {player, arg};
+        InventoryGUI gi = cls.getConstructor(partypes).newInstance(arglist);
+//        if (gi.getPlayer() == null) staticGuiInventory.put(id, gi);
+        return gi;
     }
 
-    private static void addAction(GuiAction guiAction){
-        guiActions.put(guiAction.getName().toLowerCase(), guiAction);
+    public static void closeInventory(Player player) {
+        player.closeInventory();
     }
 
-    public static boolean isGUIItem(ItemStack stack) {
-        return (new NBTItem(stack)).hasTag(TAG_GUI);
+    public static String buildId(String classname, String arg) {
+        return arg == null ? classname : classname + "_" + arg;
     }
 
-    public static GuiAction getAction(String actionName){
-        LogHelper.debug("getAction(" + actionName + ")");
-        if (guiActions.containsKey(actionName.toLowerCase())) return guiActions.get(actionName.toLowerCase());
-        LogHelper.warning("Not fount GuiAction " + actionName);
-        return null;
+    public static ArrayDeque<InventoryGUI> getInventoryStack(UUID uuid) {
+        if (playersGuiInventoryStack.get(uuid) == null) playersGuiInventoryStack.put(uuid, new ArrayDeque<>());
+        return playersGuiInventoryStack.get(uuid);
     }
 
-    public static GuiAction getAction(ItemStack stack) {
-        String actionName = getActionData(stack, "action");
-        if (actionName.isEmpty()) return null;
-        return getAction(actionName);
+    public static InventoryGUI getActiveGuiInventory(UUID uuid) {
+        if (playersGuiInventoryStack.get(uuid) == null) return null;
+        if (playersGuiInventoryStack.get(uuid).isEmpty()) return null;
+        return playersGuiInventoryStack.get(uuid).getFirst();
     }
 
-    public static String getActionData(ItemStack stack, String argName) {
-        if (stack == null || stack.getType().isAir() || stack.getAmount() == 0) return "";
-        NBTCompound compound = (new NBTItem(stack)).getCompound(TAG_GUI);
-        if (compound == null) return "";
-        return compound.getString(argName).replaceAll("\"","");
+    public static void setInventoryStack(UUID uuid, ArrayDeque<InventoryGUI> gis) {
+        playersGuiInventoryStack.put(uuid, gis);
+    }
+
+    public static void clearInventoryStack(UUID uuid) {
+        playersGuiInventoryStack.put(uuid, null);
     }
 }

@@ -1,6 +1,7 @@
 package ua.rozipp.core.command;
 
 import net.kyori.adventure.text.Component;
+import ua.rozipp.core.MessageHelper;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,7 +25,7 @@ public abstract class SelectorAbstractCommand extends CustomCommand {
 		this.withExecutor((sender, label, args) -> {
 			if (args.length < 1) {
 				for (int i = 0; i < selectorCommands.size(); i++) {
-					sender.sendMessage(Component.text("(" + i + ") ")
+					MessageHelper.send(sender, Component.text("(" + i + ") ")
 							.append(Component.text(selectorCommands.get(i)))
 							.append(Component.space())
 							.append(Component.space())

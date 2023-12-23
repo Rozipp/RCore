@@ -14,7 +14,7 @@ import org.bukkit.potion.PotionEffectType;
 public class PoisonEnchantment extends CustomEnchantment {
 
 	public PoisonEnchantment() {
-		super("poision", Component.text("Ядовитое лезвие", NamedTextColor.GREEN, TextDecoration.BOLD), ItemSet.WEAPONS, 1, null);
+		super("poision", Component.translatable("item.enchantment.lore.poision").color(NamedTextColor.GREEN).decorate(TextDecoration.BOLD), ItemSet.WEAPONS, 1, null);
 	}
 
 	public static void onAttack(EntityDamageByEntityEvent event) {

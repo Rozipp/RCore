@@ -9,6 +9,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityPickupItemEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.inventory.ItemStack;
+import ua.rozipp.core.MessageHelper;
 import ua.rozipp.core.items.CustomMaterial;
 
 import java.util.ArrayList;
@@ -29,7 +30,7 @@ public class PlayerCustomMaterialListener implements Listener {
             }
             if (name == null) name = Component.space();
 
-            player.sendMessage(Component.translatable("var_customItem_Pickup", NamedTextColor.GREEN)
+            MessageHelper.send(player, Component.translatable("var_customItem_Pickup", NamedTextColor.GREEN)
                     .args(Component.text(event.getItem().getItemStack().getAmount()).color(NamedTextColor.LIGHT_PURPLE),
                             name));
         }

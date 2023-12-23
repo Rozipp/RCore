@@ -5,7 +5,6 @@ import org.bukkit.event.Event;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 import redempt.redlib.RedLib;
-import redempt.redlib.commandmanager.ArgType;
 import redempt.redlib.enchants.trigger.EnchantTrigger;
 import redempt.redlib.misc.EventListener;
 
@@ -281,16 +280,6 @@ public class EnchantRegistry {
 	 */
 	public String getDisplayName(CustomEnchant enchant) {
 		return namer.apply(enchant);
-	}
-	
-	/**
-	 * Gets the ArgType for CustomEnchants in this registry, with tab completion using IDs
-	 *
-	 * @param name The name to use for the argument type
-	 * @return A CommandArgumentType for CustomEnchants in this registry
-	 */
-	public ArgType<? extends CustomEnchant> getEnchantArgType(String name) {
-		return new ArgType<>(name, this::getByName).tabStream(c -> enchants.keySet().stream());
 	}
 	
 }

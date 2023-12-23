@@ -1,6 +1,7 @@
 package ua.rozipp.core.command;
 
 import lombok.Getter;
+import lombok.Setter;
 import net.kyori.adventure.text.Component;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
@@ -9,6 +10,10 @@ import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
+import ua.rozipp.core.LogHelper;
+import ua.rozipp.core.MessageHelper;
+import ua.rozipp.core.PluginHelper;
+import ua.rozipp.core.RCore;
 import ua.rozipp.core.command.taber.Taber;
 import ua.rozipp.core.exception.ComponentException;
 
@@ -36,7 +41,9 @@ public class CustomCommand implements PluginIdentifiableCommand {
 	private String permissionMessage = null;
 	private final List<Validator> validators = new ArrayList<>();
 	private CustomExecutor executor = null;
-	private final List<Taber> tabs = new ArrayList<>();
+	private List<Taber> tabs = new ArrayList<>();
+	@Setter
+	private CustomCommand parentCommand;
 
 	public CustomCommand(String string_cmd) {
 		this.string_cmd = string_cmd;
@@ -44,33 +51,49 @@ public class CustomCommand implements PluginIdentifiableCommand {
 
 	public static Player getPlayer(CommandSender sender) throws ComponentException {
 		if (sender instanceof Player) return (Player) sender;
-		throw new ComponentException(Component.translatable("cmd_MustBePlayer"));
+		throw new ComponentException(Component.translatable("cmd.error.mustBePlayer"));
 	}
 
-	public static Integer getNamedInteger(String[] args, int index) throws ComponentException {
-		if (args.length < (index + 1)) throw new ComponentException(Component.translatable("cmd_enterNumber"));
+	public static int getNamedInteger(String[] args, int index) throws ComponentException {
+		if (args.length <= index) throw new ComponentException(Component.translatable("cmd.error.enterNumber"));
 		try {
-			return Integer.valueOf(args[index]);
+			return Integer.parseInt(args[index]);
 		} catch (NumberFormatException e) {
 			throw new ComponentException(Component.text(args[index])
 					.append(Component.space())
-					.append(Component.translatable("cmd_enterNumerError2").args(Component.text(index + 1))));
+					.append(Component.translatable("cmd.error.enterInteger").args(Component.text(index + 1))));
 		}
 	}
 
-	public static Double getNamedDouble(String[] args, int index) throws ComponentException {
-		if (args.length < (index + 1)) throw new ComponentException(Component.translatable("cmd_enterNumber"));
+	public static double getNamedDouble(String[] args, int index) throws ComponentException {
+		if (args.length <= index) throw new ComponentException(Component.translatable("cmd.error.enterNumber"));
 		try {
-			return Double.valueOf(args[index]);
+			return Double.parseDouble(args[index]);
 		} catch (NumberFormatException e) {
 			throw new ComponentException(Component.text(args[index] + " ")
-					.append(Component.translatable("cmd_enterNumerError").args(Component.text(index + 1))));
+					.append(Component.translatable("cmd.error.enterDouble").args(Component.text(index + 1))));
 		}
 	}
 
 	public static String getNamedString(String[] args, int index, String message) throws ComponentException {
-		if (args.length < (index + 1)) throw new ComponentException(message);
+		if (args.length <= index) throw new ComponentException(message);
 		return args[index];
+	}
+
+	public static String getNamedString(String[] args, int index, Component component) throws ComponentException {
+		if (args.length <= index) throw new ComponentException(component);
+		return args[index];
+	}
+
+	public static Plugin getNamedPlugin(String[] args, int index) throws ComponentException {
+		Plugin plugin;
+		try {
+			String pluginName = getNamedString(args, index, Component.translatable("cmd.error.enterPluginName"));
+			plugin = PluginHelper.getPlugin(pluginName);
+		} catch (Exception e) {
+			plugin = PluginHelper.getPlugin(RCore.class);
+		}
+		return plugin;
 	}
 
 	public CustomCommand withValidator(Validator validator) {
@@ -125,25 +148,27 @@ public class CustomCommand implements PluginIdentifiableCommand {
 		this.aliases = Arrays.asList(aliases);
 	}
 
-	public void valide(CommandSender sender) throws ComponentException {
-		if (validators != null)
-			for (Validator v : validators)
-				v.isValide(sender);
-		if (getPermission() != null && !getPermission().isEmpty()){
+	public void valid(CommandSender sender) throws ComponentException {
+		for (Validator v : validators)
+			v.isValide(sender);
+		if (getPermission() != null && !getPermission().isEmpty()) {
 			if (!sender.hasPermission(getPermission()))
-				throw new ComponentException(Component.translatable("cmd_noPermission"));
+				if (permissionMessage != null)
+					throw new ComponentException(Component.text(permissionMessage));
+				else
+					throw new ComponentException(Component.translatable("cmd.error.noPermission"));
 		}
 
 	}
 
 	public boolean onCommand(CommandSender sender, String label, String[] args) {
 		try {
-			if (executor == null) throw new ComponentException("Команда в разработке");
-			valide(sender);
+			if (executor == null) throw new ComponentException(Component.translatable("cmd.error.underDevelopment"));
+			valid(sender);
 			executor.run(sender, label, args);
 			return true;
 		} catch (ComponentException e) {
-			sender.sendMessage(e.getComponent());
+			MessageHelper.send(sender, e.getComponent());
 			return false;
 		}
 	}
@@ -163,12 +188,15 @@ public class CustomCommand implements PluginIdentifiableCommand {
 
 	@Override
 	public @NotNull Plugin getPlugin() {
-		return plugin;
+		return (parentCommand != null) ? getParentCommand().getPlugin() : plugin;
+	}
+
+	public void setTabs(List<Taber> tabs) {
+		this.tabs = tabs;
 	}
 
 	public interface CustomExecutor {
 		void run(CommandSender sender, String label, String[] args) throws ComponentException;
 	}
-
 
 }

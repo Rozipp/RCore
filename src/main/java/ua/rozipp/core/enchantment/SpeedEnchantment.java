@@ -8,7 +8,7 @@ public class SpeedEnchantment extends CustomEnchantment {
 	private static Double percentPerLevel = 0.02;
 
 	protected SpeedEnchantment() {
-		super("speed", Component.translatable("itemLore_Speed_Bonus"), ItemSet.LEGGINGS, 100, null);
+		super("speed", Component.translatable("item.enchantment.lore.speed_Bonus"), ItemSet.LEGGINGS, 100, null);
 	}
 
 	@Override

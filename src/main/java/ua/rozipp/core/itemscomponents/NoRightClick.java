@@ -4,13 +4,11 @@ import org.bukkit.Material;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
-import ua.rozipp.core.config.RConfig;
-import ua.rozipp.core.exception.InvalidConfiguration;
 
 public class NoRightClick extends ItemComponent {
 
-    public NoRightClick(RConfig compInfo) throws InvalidConfiguration {
-        super(compInfo);
+    public NoRightClick() {
+        super();
     }
 
     public void onInteract(PlayerInteractEvent event) {

@@ -3,108 +3,86 @@ package ua.rozipp.core.command;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandMap;
-import org.bukkit.command.CommandSender;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.jetbrains.annotations.NotNull;
 import ua.rozipp.core.LogHelper;
+import ua.rozipp.core.MessageHelper;
+import ua.rozipp.core.util.ComponentUtils;
 
-import java.lang.reflect.Field;
 import java.util.*;
 
-/** Регистрирует класы CustomCommand как команды плагина
- * @author ua.rozipp */
+/**
+ * Регистрирует класы CustomCommand как команды плагина
+ *
+ * @author ua.rozipp
+ */
 public class CommanderRegistration {
 
-	private static final Map<String, CustomCommand> registeredCommands = new HashMap<>();
-	protected static CommandMap cmap;
-	public static int count = 0;
+    private static final Map<String, CustomCommand> registeredCommands = new HashMap<>();
+    protected static CommandMap cmap;
 
-	public static void register(JavaPlugin plugin, CustomCommand customCommand) {
-		String fromPlugin = plugin.getName();
-		PluginCommand c = plugin.getCommand(customCommand.getString_cmd());
-		if (c != null){
-			c.setExecutor((sender1, cmd1, label1, args1) -> customCommand.onCommand(sender1, label1, args1));
-			c.setTabCompleter((sender, cmd, label, args) -> customCommand.onTab(sender, label, args));
-		} else {
-			ReflectCommand command;
-			if (customCommand.getString_cmd() != null && !customCommand.getString_cmd().isEmpty())
-				command = new ReflectCommand(customCommand);
-			else
-				throw new CommandNotPreparedException("Command does not have a name.");
-			getCommandMap().register(fromPlugin, command);
-		}
-		registeredCommands.put(customCommand.getString_cmd(), customCommand);
-		count++;
-	}
+    public static void register(JavaPlugin plugin, CustomCommand customCommand) {
+        if (customCommand.getString_cmd() == null || customCommand.getString_cmd().isEmpty())
+            throw new CommandNotPreparedException("Command does not have a name.");
+        PluginCommand c = plugin.getCommand(customCommand.getString_cmd());
+        if (c != null) {
+            c.setExecutor((sender, cmd, label, args) -> customCommand.onCommand(sender, label, args));
+            c.setTabCompleter((sender, cmd, label, args) -> customCommand.onTab(sender, label, args));
+            if (customCommand.getAliases() != null) c.setAliases(customCommand.getAliases());
+            if (customCommand.getDescription() != null)
+                c.setDescription(ComponentUtils.componentToString(customCommand.getDescription()));
+            if (customCommand.getPermission() != null) c.setPermission(customCommand.getPermission());
+            if (customCommand.getPermissionMessage() != null)
+                c.setPermissionMessage(customCommand.getPermissionMessage());
+            if (customCommand.getUsage() != null) c.setUsage(customCommand.getUsage());
+        } else {
+            Command command = new ReflectCommand(customCommand);
+            getCommandMap().register(plugin.getName(), command);
+        }
+        registeredCommands.put(customCommand.getString_cmd(), customCommand);
+    }
 
-	public static void unregister(CustomCommand customCommand) {
-		Command command = getCommandMap().getCommand(customCommand.getString_cmd());
-		if (command != null)
-			command.unregister(getCommandMap());
-		registeredCommands.remove(customCommand.getString_cmd());
-	}
+    public static void unregisterAllCommands(Plugin plugin) {
+        List<CustomCommand> unregisterCommand = new ArrayList<>();
+        for (CustomCommand command : registeredCommands.values()) {
+            if (command.getPlugin().equals(plugin)) {
+                unregisterCommand.add(command);
+            }
+        }
+        int count = 0;
+        for (CustomCommand customCommand : unregisterCommand) {
+            Command command = getCommandMap().getCommand(customCommand.getString_cmd());
+            if (command != null)
+                command.unregister(getCommandMap());
+            customCommand.withExecutor((sender, label, args) -> MessageHelper.sendError(sender, "This Command is not active"));
+            count++;
+            Bukkit.getServer().getCommandMap().getKnownCommands().remove(customCommand.getString_cmd().toLowerCase(Locale.ENGLISH));
+            Bukkit.getServer().getCommandMap().getKnownCommands().remove((plugin.getName() + ":" + customCommand.getString_cmd()).toLowerCase(Locale.ENGLISH));
+            registeredCommands.remove(customCommand.getString_cmd());
+        }
+        LogHelper.fine("Unregistered " + count + "\\" + unregisterCommand.size() + " CustomCommand");
+    }
 
-	public static void unregisterAllCommands(Plugin plugin) {
-		List<CustomCommand> unregisterCommand = new ArrayList<>();
-		for (CustomCommand command : registeredCommands.values()) {
-			if (command.getPlugin().equals(plugin)) {
-				unregisterCommand.add(command);
-			}
-		}
-		for (CustomCommand command: unregisterCommand){
-			unregister(command);
-		}
-		LogHelper.fine("Unregistered " + unregisterCommand.size() + " CustomCommand");
-	}
+    private static CommandMap getCommandMap() {
+        if (cmap == null) {
+            cmap = Bukkit.getCommandMap();
+//only Paper
+//            try {
+//                final Field f = Bukkit.getServer().getClass().getDeclaredField("commandMap");
+//                f.setAccessible(true);
+//                cmap = (CommandMap) f.get(Bukkit.getServer());
+//            } catch (Exception e) {
+//                e.printStackTrace();
+//            }
+        }
+        return cmap;
+    }
 
-	private static CommandMap getCommandMap() {
-		if (cmap == null) {
-			try {
-				final Field f = Bukkit.getServer().getClass().getDeclaredField("commandMap");
-				f.setAccessible(true);
-				cmap = (CommandMap) f.get(Bukkit.getServer());
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-		} else
-			return cmap;
-		return getCommandMap();
-	}
-
-	/** Клас-обертка для регистрации класов CustomCommand как команды плагина
-	 * @author ua.rozipp */
-	private static final class ReflectCommand extends Command {
-
-		private final CustomCommand customCommand;
-
-		private ReflectCommand(CustomCommand customCommand) {
-			super(customCommand.getString_cmd());
-			this.customCommand = customCommand;
-			if (customCommand.getAliases() != null) this.setAliases(customCommand.getAliases());
-//			if (custonCommand.getDescription() != null) this.setDescription(custonCommand.getDescription().insertion());
-			if (customCommand.getPermission() != null) this.setPermission(customCommand.getPermission());
-			if (customCommand.getPermissionMessage() != null) this.setPermissionMessage(customCommand.getPermissionMessage());
-			if (customCommand.getUsage() != null) this.setUsage(customCommand.getUsage());
-		}
-
-		@Override
-		public boolean execute(@NotNull CommandSender sender, @NotNull String label, String[] args) {
-			return customCommand.onCommand(sender, label, args);
-		}
-
-		@Override
-		public @NotNull List<String> tabComplete(@NotNull CommandSender sender, @NotNull String label, String[] args) {
-			return customCommand.onTab(sender, label, args);
-		}
-	}
-
-	@SuppressWarnings("serial")
-	public static class CommandNotPreparedException extends RuntimeException {
-		public CommandNotPreparedException(String message) {
-			super(message);
-		}
-	}
+    public static class CommandNotPreparedException extends RuntimeException {
+        public CommandNotPreparedException(String message) {
+            super(message);
+        }
+    }
 
 }

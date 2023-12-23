@@ -6,170 +6,99 @@ import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import ua.rozipp.core.LogHelper;
-import ua.rozipp.core.exception.InvalidConfiguration;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.*;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 
-public class RConfigFile extends YamlConfiguration implements RConfig {
+public class RConfigFile extends RConfigMap {
 
-    private static final Map<String, RConfigFile> rConfigFiles = new HashMap<>();
+    private final File file;
+    private YamlConfiguration yamlConfiguration;
+    final String key;
 
-    public static RConfigFile loadConfigFile(Plugin plugin, String filepath) {
-        RConfigFile rConfigFile = new RConfigFile(plugin, filepath);
-        rConfigFiles.put(getFileKey(plugin, filepath), rConfigFile);
-        return rConfigFile;
-    }
-
-    public static void saveToConfigFile(Plugin plugin, String fileName, @NotNull String path, @Nullable Object value) {
-        RConfigFile rConfig = rConfigFiles.get(getFileKey(plugin, fileName));
-        if (rConfig == null) {
-            rConfig = loadConfigFile(plugin, fileName);
-        }
-        rConfig.set(path, value);
-    }
-
-    private static String getFileKey(Plugin plugin, String filepath) {
-        return ((plugin != null) ? plugin.getName() + ":" : "") + filepath;
-    }
-
-    private File file;
-    private boolean loaded = false;
-    private final String filepath;
-
-    public RConfigFile(@NotNull Plugin plugin, @NotNull String filepath) {
-        super();
-        this.filepath = filepath;
-        this.file = new File(plugin.getDataFolder(), filepath);
-        if (file.isDirectory()) {
-            file = null;
-            return;
-        }
-        if (!file.exists()) {
-            LogHelper.warning("Configuration file:" + filepath + " was missing. Streaming to disk from Jar.");
-            try {
-                plugin.saveResource(filepath, true);
-            } catch (Exception e) {
-                LogHelper.error("Could not get file \"" + filepath + "\" from plugin file " + plugin.getName() + ".jar");
-                file = null;
-                return;
-            }
-        }
-
-        try {
-            load();
-        } catch (IOException | InvalidConfigurationException e) {
-            LogHelper.warning(e.getMessage());
-        }
-    }
-
-    public boolean isLoaded() {
-        return loaded;
-    }
-
-    public void set(@NotNull String path, @Nullable Object value, boolean save) {
-        if (!loaded) return;
-        super.set(path, value);
-        if (save) {
-            try {
-                save();
-            } catch (IOException e) {
-                LogHelper.error(e.getMessage());
-            }
-        }
-    }
-
-    public void reload() throws IOException, InvalidConfigurationException {
-        this.map.clear();
+    RConfigFile(@NotNull Plugin plugin, @NotNull String filePath) throws IOException {
+        super(plugin);
+        file = new File(plugin.getDataFolder(), filePath + ".yml");
+        if (!file.exists()) throw new IOException("File: \"" + filePath + ".yml \" was missing.");
+        key = getFileKey(plugin, filePath);
         load();
+        ConfigHelper.rConfigFiles.put(key, this);
     }
 
-    public void load() throws IOException, InvalidConfigurationException {
-        if (file == null) return;
-        try {
-            this.load(file);
-        } catch (IOException | InvalidConfigurationException e) {
-            LogHelper.error("filepath=" + filepath + ": " + e.getMessage());
-            file = null;
-            return;
-        }
+    static String getFileKey(Plugin plugin, String filePath) {
+        return plugin.getName() + ":" + filePath;
+    }
 
-        loaded = true;
-        LogHelper.fine("Configuration file: \"" + filepath + "\" loaded");
+    public void setAndSave(@NotNull String path, @Nullable Object value) {
+        set(path, value);
+        try {
+            save();
+        } catch (IOException e) {
+            LogHelper.error(e.getMessage());
+        }
+    }
+
+    public void load() throws IOException {
+        try {
+            yamlConfiguration = new YamlConfiguration();
+            yamlConfiguration.load(file);
+        } catch (InvalidConfigurationException e) {
+            throw new IOException("filepath=" + file.getAbsolutePath() + ": " + e.getMessage());
+        }
+        values.clear();
+        LogHelper.fine("Configuration file: \"" + key + "\" loaded");
+
+        for (String key : yamlConfiguration.getKeys(false)) {
+            Object o = yamlConfiguration.get(key);
+            Object dest = get(key);
+
+            if (o instanceof List) {
+                List<Object> result;
+                if (dest == null) {
+                    result = new LinkedList<>();
+                    values.put(key, result);
+                } else result = (List<Object>) dest;
+                for (Object ob : (List) o) {
+                    RConfig rConfig = RConfig.createRConfig(getPlugin(), ob);
+                    result.add((rConfig == null) ? ob : rConfig);
+                }
+                continue;
+            }
+
+            if (dest == null) {
+                RConfig rConfig = RConfig.createRConfig(getPlugin(), o);
+                values.put(key, (rConfig == null) ? o : rConfig);
+                continue;
+            }
+
+            if (o instanceof Map) {
+                if (dest instanceof RConfigMap) {
+                    ((RConfigMap) dest).putAll((Map<String, ?>) o);
+                    continue;
+                }
+                if (dest instanceof Map) {
+                    ((Map<String, Object>) dest).putAll((Map<String, ?>) o);
+                    continue;
+                }
+            }
+        }
     }
 
     public void save() throws IOException {
-        if (!loaded) return;
-        if (file != null) save(file);
+        yamlConfiguration.save(file);
     }
 
     @Override
-    public String getString(String path, @Nullable String defVal, String message) throws InvalidConfiguration {
-        String result = getString(path, defVal);
-        if (result == null)
-            throw new InvalidConfiguration((message != null) ? message : "This configSection does not contain the data block \"" + path + "\"");
-        return result;
+    public void set(@NotNull String path, @Nullable Object value) {
+        super.set(path, value);
+        yamlConfiguration.set(path, value);
     }
 
     @Override
-    public Integer getInt(String path, @Nullable Integer defVal, String message) throws InvalidConfiguration {
-        try {
-            Object o = get(path);
-            if (o instanceof Number)
-                return ((Number) o).intValue();
-            if (o instanceof String)
-                return Integer.parseInt((String) o);
-        } catch (Exception ignored) {
-        }
-        if (defVal == null)
-            throw new InvalidConfiguration((message != null) ? message : "This configSection does not contain the data block \"" + path + "\"");
-        return defVal;
+    public String toString() {
+        return "RConfigFile:\"" + key + "\": " + getKeys(false).toString();
     }
-
-    @Override
-    public Boolean getBoolean(String path, @Nullable Boolean defVal, String message) throws InvalidConfiguration {
-        try {
-            return getBoolean(path, defVal);
-        } catch (NullPointerException e) {
-            throw new InvalidConfiguration((message != null) ? message : "This configSection does not contain the data block \"" + path + "\"");
-        }
-    }
-
-    @Override
-    public Double getDouble(String path, @Nullable Double defVal, String message) throws InvalidConfiguration {
-        try {
-            Object o = get(path);
-            if (o instanceof Number)
-                return getDouble(path, defVal);
-            if (o instanceof String)
-                return Double.parseDouble((String) o);
-        } catch (NullPointerException e) {
-            throw new InvalidConfiguration((message != null) ? message : "This configSection does not contain the data block \"" + path + "\"");
-        }
-        throw new InvalidConfiguration((message != null) ? message : "This configSection does not contain the data block \"" + path + "\"");
-    }
-
-    @Override
-    public <T> List<T> getList(String path, Class<T> aClass, List<T> defVal, String message) throws InvalidConfiguration {
-        List<?> list = getList(path);
-        if (list != null) {
-            List<T> result = new ArrayList<>();
-            for (Object o : list)
-                try {
-                    result.add((T) o);
-                } catch (Exception ignored) {
-                }
-            return result;
-        }
-        if (defVal == null)
-            throw new InvalidConfiguration((message != null) ? message : "This is not List or path not found. Key=" + path);
-        return defVal;
-    }
-
-    @Override
-    public @NotNull Set<String> getKeys(boolean deep) {
-        return super.getKeys(deep);
-    }
-
 }

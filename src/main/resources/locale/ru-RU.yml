@@ -1,0 +1,64 @@
+# 
+# =========================== Commands =========================
+locales:
+  - locale: ru_Ru
+    welcome_string: Добро пожаловать на тестовый сервер [%0] [%1]
+    cmd:
+      error:
+        indexOfBound: "Недопустимый номер команды. Ведите номер между 0 и {0}"
+        enterNumber: Нехватает числа
+        enterInteger: '{0}-й аргумент должен быть целым числом'
+        enterDouble: '{0}-й аргумент должен быть дробным числом'
+        enterPluginName: "Введите название плагина"
+        unknownCommand: Непонятная команда
+        commandNotFound: Команда не найдена
+        underDevelopment: "Команда находиться в разработке"
+        mustBeOnlyAdmin: Эта команда только для админов
+        mustBePlayer: Только игрок может использовать эту команду.
+        noPermission: У вас недостаточно прав!
+      rcore:
+        description: "Сервисное меню плагина RCore"
+        items:
+          description: "Меню управления предметами"
+        config:
+          reloadLocaleSuccess: "Языковые строки для плагина {0} были успешно перезагружены"
+
+
+      configReload: 'Конфиг {0} был успешно перезагружен!'
+      tnt_targetGive: 'Вы получили: {0}&r x{1}'
+      tnt_senderGive: 'Вы выдали: {0}&r x{1} игроку {2}'
+      rcore_items_desc: "Команды связанные с предметами"
+
+      clearchat: clearchat
+      cancelPromptMessage: "&cType '{0}' to cancel."
+      cancelText: cancel
+      adcmd:
+        startMission: adcmd_startMission
+        serverDesc: shows the name of this server
+        itemsDesc: Открывает GUI со всеми предметами CivCraftt
+        itemDesc: Does special things to the item in your hand.
+        item_cmdDesc: Admin Item
+        item_giveDesc: '[player] [custom_id] [Сумма] - Дает CivCraft предмет игроку.'
+        item_givePrompt: Enter a custom id from
+        item_giveInvalid: 'No custom item with id:'
+        item_giveSuccess: Gave item.
+        item_enhanceNoItem: You must have an item in your hand to enhance it.
+        item_enhancementList: Possible Enchants
+        item_enhanceSuccess: Enhanced with [%0]
+        item_enhanceDesc: adcmd_item_enhanceDesc
+      gc: Сборщик мусора явы
+      gc_result: Сборщик мусора отработал за [%0] мс.
+    item:
+      enchantment:
+        lore:
+          attack: "Урон "
+          defense: "Защита "
+          soulbound: "Сохранить при смерти"
+      component:
+        lore:
+          attack: "Урон "
+          rangedAttack: "Урон "
+          defense: "Защита "
+          soulbound: "Сохранить при смерти"
+          rightClickToUse: "<Нажми правую кнопку>"
+

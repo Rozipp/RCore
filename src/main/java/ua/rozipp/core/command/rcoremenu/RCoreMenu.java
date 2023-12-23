@@ -7,11 +7,11 @@ import ua.rozipp.core.command.Validators;
 public class RCoreMenu extends CustomMenuCommand {
     public RCoreMenu() {
         super("rcore");
-        withDescription(Component.text("Сервисное меню плагина RCore"));
+        withDescription(Component.translatable("cmd.rcore.description"));
         withValidator(Validators.mustBeAdmin);
         add(new RCoreItemsMenu());
         add(new RCoreBlocksMenu());
-        add(new RCoreReloadMenu());
+        add(new RCoreConfigMenu());
         add(new RCoreLocaleMenu());
         add(new RCoreLoggerMenu());
     }

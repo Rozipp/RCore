@@ -43,7 +43,9 @@ public final class Database {
     public Database(@NotNull Plugin plugin, @NotNull RConfig config, @NotNull DatabaseType databaseType) throws InvalidConfiguration, DatabaseException, SQLException {
         this.plugin = plugin;
 
-        RConfig credentialsConfig = config.getRConfig("database." + databaseType.getKey(), null);
+        RConfig credentialsConfig = config.getRConfig("database." + databaseType.getKey());
+        if (credentialsConfig == null)
+            throw new InvalidConfiguration("Not found key " + "database." + databaseType.getKey());
         this.databaseCredentials = DatabaseCredentialsParser.parse(plugin, credentialsConfig, databaseType);
         this.databaseCredentials.loadDriver(plugin);
         this.connectionSource = createConnection();

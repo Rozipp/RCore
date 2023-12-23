@@ -5,7 +5,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.Consumer;
 
-import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -15,7 +14,6 @@ import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
 import redempt.redlib.RedLib;
-import redempt.redlib.commandmanager.Messages;
 import ua.rozipp.core.util.ComponentUtils;
 
 public class ChatPrompt implements Listener {
@@ -89,7 +87,7 @@ public class ChatPrompt implements Listener {
 			return;
 		}
 		event.setCancelled(true);
-		String cancelText = ComponentUtils.componentedToString(RedLib.msg("cancelText"), event.getPlayer().locale());
+		String cancelText = ComponentUtils.componentToString(RedLib.msg("cancelText"), event.getPlayer().locale());
 		if (event.getMessage().equalsIgnoreCase(cancelText)) {
 			p.cancel(CancelReason.PLAYER_CANCELLED);
 			return;

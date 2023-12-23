@@ -1,163 +1,160 @@
 package ua.rozipp.core.config;
 
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import ua.rozipp.core.exception.InvalidConfiguration;
+import ua.rozipp.core.LogHelper;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.*;
 
-public class RConfigMultiFiles implements RConfig {
+public class RConfigMultiFiles extends RConfig {
 
-    private final List<RConfigFile> files = new ArrayList<>();
-
-    public RConfigMultiFiles() {
-    }
+    private final Map<String, RConfigFile> files = new HashMap<>();
+    private final Map<String, Object> value = new LinkedHashMap<>();
 
     public RConfigMultiFiles(Plugin plugin) {
-        {
-            File dir = plugin.getDataFolder();
-            for (String fileName : Objects.requireNonNull(dir.list())) {
-                RConfigFile file = new RConfigFile(plugin, fileName);
-                if (file.isLoaded()) files.add(file);
+        super(plugin);
+    }
+
+    private void addFile(String fileKey, RConfigFile rConfigFile) {
+        files.put(fileKey, rConfigFile);
+        for (String key : rConfigFile.getKeys(false)) {
+            Object o = rConfigFile.get(key);
+            Object dest = value.get(key);
+
+            if (o instanceof List) {
+                List<Object> result;
+                if (dest == null) {
+                    result = new LinkedList<>();
+                    value.put(key, result);
+                } else result = (List<Object>) dest;
+                for (Object ob : (List) o) {
+                    RConfig rConfig = RConfig.createRConfig(getPlugin(), ob);
+                    result.add((rConfig == null) ? ob : rConfig);
+                }
+                continue;
             }
+
+            if (dest == null) {
+                RConfig rConfig = RConfig.createRConfig(getPlugin(), o);
+                value.put(key, (rConfig == null) ? o : rConfig);
+                continue;
+            }
+
+            if (o instanceof Map) {
+                if (dest instanceof RConfigMap) {
+                    ((RConfigMap) dest).putAll((Map<String, ?>) o);
+                    continue;
+                }
+                if (dest instanceof Map) {
+                    ((Map<String, Object>) dest).putAll((Map<String, ?>) o);
+                    continue;
+                }
+            }
+            LogHelper.error("Found duplicate key: \"" + key + "\" in files: " + foundKey(key));
         }
-        {
-            File dir = new File(plugin.getDataFolder(), "data");
-            for (String fileName : Objects.requireNonNull(dir.list())) {
-                RConfigFile file = new RConfigFile(plugin, "data" + File.separator + fileName);
-                if (file.isLoaded()) files.add(file);
+    }
+
+    public void loadFile(String filepath) {
+        loadFiles(filepath, false);
+    }
+
+    public void loadFiles(boolean deep) {
+        loadFiles("", deep);
+    }
+
+    public void loadFiles() {
+        loadFiles("", true);
+    }
+
+    public void reload() {
+        value.clear();
+        files.values().forEach(f -> {
+            try {
+                f.load();
+                addFile(f.key, f);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        });
+    }
+
+    public void loadFiles(String filepath, boolean deep) {
+        File file = (filepath.isEmpty()) ? getPlugin().getDataFolder() : new File(getPlugin().getDataFolder(), filepath);
+        if (file.isDirectory() && deep) {
+            for (String fileName : Objects.requireNonNull(file.list())) {
+                if (fileName.startsWith("\\")) fileName = fileName.substring(1);
+                fileName = fileName.replaceAll("\\.(\\w+)$", "");
+                loadFiles(filepath + File.separator + fileName, true);
+            }
+        } else {
+            try {
+                RConfigFile rConfigFile = ConfigHelper.getRConfigFile(getPlugin(), filepath);
+                addFile(rConfigFile.key, rConfigFile);
+            } catch (IOException e) {
+                LogHelper.error(e.getMessage());
             }
         }
     }
 
-    public void addFile(RConfigFile rConfigFile) {
-        files.add(rConfigFile);
-    }
-
-    public void addAllFile(Collection<RConfigFile> rConfigFiles) {
-        files.addAll(rConfigFiles);
-    }
 
     @Override
     public @NotNull Set<String> getKeys(boolean deep) {
-        Set<String> result = new HashSet<>();
-        for (RConfigFile f : files) {
-            result.addAll(f.getKeys(deep));
-        }
-        return result;
+        return Collections.unmodifiableSet(files.keySet());
     }
 
     @Override
     public @NotNull Map<String, Object> getValues(boolean deep) {
-        Map<String, Object> result = new HashMap<>();
-        for (RConfigFile f : files) {
-            result.putAll(f.getValues(deep));
-        }
-        return result;
+        return Collections.unmodifiableMap(files);
     }
 
     @Override
     public boolean contains(@NotNull String path) {
-        for (RConfigFile f : files) {
-            if (f.contains(path)) return true;
-        }
-        return false;
+        String[] split = RConfig.splitFirstAndOther(path);
+        if (split.length == 1) return files.containsKey(split[0]);
+        return files.get(split[0]).contains(split[1]);
     }
 
     @Override
     public @Nullable Object get(@NotNull String path) {
-        for (RConfigFile f : files) {
-            if (f.contains(path))
-                return f.get(path);
+        if (path.isEmpty()) return this;
+        String[] split = RConfig.splitFirstAndOther(path);
+        if (files.containsKey(split[0])) {
+            if (split.length == 1) return files.get(split[0]);
+            else return files.get(split[0]).get(split[1]);
+        }
+        if (value.containsKey(split[0])) {
+            Object o = value.get(split[0]);
+            if (split.length == 1 || o == null) {
+                return o;
+            } else {
+                if (o instanceof RConfig) return ((RConfig) o).get(split[1]);
+                if (o instanceof ConfigurationSection) return ((ConfigurationSection) o).get(split[1]);
+                if (o instanceof Map) return RConfigMap.getChildren((Map<String, Object>) o, split[1]);
+            }
         }
         return null;
     }
 
     @Override
     public void set(@NotNull String path, @Nullable Object value) {
-        Exception e = new Exception("Using method Set() is RConfigMultiFiles not supported");
+        Exception e = new Exception("Using method Set() in RConfigMultiFiles not supported");
         e.printStackTrace();
     }
 
-    @Override
-    public <T> T getObject(@NotNull String path, @NotNull Class<T> aClass) {
-        for (RConfigFile f : files) {
-            Object o = f.get(path);
-            if (aClass.isInstance(o)) return aClass.cast(o);
+    public List<String> foundKey(String key) {
+        List<String> list = new ArrayList<>();
+        for (RConfigFile rConfigFile : files.values()) {
+            if (rConfigFile.contains(key)) list.add(rConfigFile.key);
         }
-        return null;
+        return list;
     }
 
     @Override
-    public String getString(String path, String defVal, String message) throws InvalidConfiguration {
-        for (RConfigFile f : files) {
-            Object o = f.get(path);
-            if (o instanceof String) return (String) o;
-        }
-        return null;
-    }
-
-    @Override
-    public Integer getInt(String path, Integer defVal, String message) throws InvalidConfiguration {
-        for (RConfigFile f : files) {
-            if (f.contains(path))
-                return f.getInt(path);
-        }
-        if (defVal == null)
-            throw new InvalidConfiguration((message != null) ? message : "This configSection does not contain the data block \"" + path + "\"");
-        return defVal;
-    }
-
-    @Override
-    public Boolean getBoolean(String path, Boolean defVal, String message) throws InvalidConfiguration {
-        for (RConfigFile f : files) {
-            if (f.contains(path))
-                return f.getBoolean(path);
-        }
-        if (defVal == null)
-            throw new InvalidConfiguration((message != null) ? message : "This configSection does not contain the data block \"" + path + "\"");
-        return defVal;
-    }
-
-    @Override
-    public Double getDouble(String path, Double defVal, String message) throws InvalidConfiguration {
-        for (RConfigFile f : files) {
-            if (f.contains(path))
-                return f.getDouble(path);
-        }
-        if (defVal == null)
-            throw new InvalidConfiguration((message != null) ? message : "This configSection does not contain the data block \"" + path + "\"");
-        return defVal;
-    }
-
-    @Override
-    public <T> List<T> getList(String path, Class<T> aClass, List<T> defVal, String message) throws InvalidConfiguration {
-        List<T> result = new ArrayList<>();
-        for (RConfigFile f : files) {
-            if (f.contains(path)) {
-                T o = f.getObject(path, aClass);
-                if (o != null) result.add(o);
-            }
-        }
-        if (result.isEmpty())
-            if (defVal == null)
-                throw new InvalidConfiguration((message != null) ? message : "This configSection does not contain the data block \"" + path + "\"");
-            else
-                return defVal;
-        return result;
-    }
-
-    @Override
-    public List<RConfig> getRConfigList(String path) throws InvalidConfiguration {
-        List<RConfig> result = new ArrayList<>();
-        for (RConfigFile f : files) {
-            if (f.contains(path)) {
-                List<RConfig> list = f.getRConfigList(path);
-                if (list != null) result.addAll(list);
-            }
-        }
-        return result;
+    public String toString() {
+        return "RConfigMultiFiles:\"" + getPlugin() + "\": " + files.keySet().toString();
     }
 }

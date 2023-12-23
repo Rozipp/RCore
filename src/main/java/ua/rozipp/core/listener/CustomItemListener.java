@@ -3,7 +3,6 @@ package ua.rozipp.core.listener;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Arrow;
-import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.Event.Result;
@@ -11,32 +10,20 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
-import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.*;
 import org.bukkit.event.inventory.*;
 import org.bukkit.event.player.*;
 import org.bukkit.inventory.*;
-import org.bukkit.metadata.MetadataValue;
-import org.bukkit.potion.PotionEffect;
-import redempt.redlib.misc.Task;
+import ua.rozipp.core.Task;
 import ua.rozipp.core.RCore;
-import ua.rozipp.core.enchantment.CriticalEnchantment;
 import ua.rozipp.core.enchantment.CustomEnchantment;
 import ua.rozipp.core.enchantment.Enchantments;
 import ua.rozipp.core.gui.GuiHelper;
-import ua.rozipp.core.gui.GuiInventory;
 import ua.rozipp.core.items.CustomMaterial;
 
 import java.util.HashMap;
 
 public class CustomItemListener implements Listener {
-
-    @EventHandler(priority = EventPriority.LOWEST)
-    public void onBlockPlace(BlockPlaceEvent event) {
-        if (event.isCancelled()) return;
-        CustomMaterial cmat = CustomMaterial.getCustomMaterial(event.getItemInHand());
-        if (cmat != null) cmat.onBlockPlaced(event);
-    }
 
     @EventHandler(priority = EventPriority.LOWEST)
     public void onPlayerInteract(PlayerInteractEvent event) {
@@ -145,7 +132,7 @@ public class CustomItemListener implements Listener {
 
         Double baseDamage = event.getDamage();
 
-        Player defendingPlayer = null;
+       /* Player defendingPlayer = null;
         if (event.getEntity() instanceof Player) defendingPlayer = (Player) event.getEntity();
 
         if (event.getDamager() instanceof Arrow) {
@@ -192,14 +179,14 @@ public class CustomItemListener implements Listener {
             if (cMat != null)
                 cMat.onAttack(event, inHand);
             else
-                event.setDamage(RCore.minDamage); /* Non-civcraft items only do 0.5 damage. */
+                event.setDamage(RCore.minDamage); *//* Non-civcraft items only do 0.5 damage. *//*
 
             if (Enchantments.hasEnchantment(inHand, CustomEnchantment.Critical))
                 CriticalEnchantment.run(event, inHand);
         }
 
         if (defendingPlayer != null) {
-            /* Search equipt items for defense event. */
+            *//* Search equipt items for defense event. *//*
             for (ItemStack stack : defendingPlayer.getEquipment().getArmorContents()) {
                 CustomMaterial cmat = CustomMaterial.getCustomMaterial(stack);
                 if (cmat != null) cmat.onDefense(event, stack);
@@ -211,12 +198,12 @@ public class CustomItemListener implements Listener {
                     le.damage(event.getDamage() * Enchantments.getLevelEnchantment(chestplate, CustomEnchantment.Thorns), defendingPlayer);
                 }
             }
-        }
+        }*/
     }
 
     @EventHandler(priority = EventPriority.NORMAL)
     public void OnInventoryClose(InventoryCloseEvent event) {
-        GuiInventory.clearInventoryStack(((Player) event.getPlayer()).getUniqueId());
+        GuiHelper.clearInventoryStack(event.getPlayer().getUniqueId());
     }
 
     @EventHandler(priority = EventPriority.NORMAL)
@@ -353,8 +340,8 @@ public class CustomItemListener implements Listener {
     private boolean itemToInventory(Cancellable event, Player player, Inventory inv, Inventory topInv, ItemStack stack) {
         boolean stackEmpty = (stack == null) || stack.getType().equals(Material.AIR);
         if (stackEmpty) return false;
-        GuiInventory gi = GuiInventory.getActiveGuiInventory(player.getUniqueId());
-        if (gi != null && inv.equals(topInv)) return gi.onItemToInventory(event, player, inv, stack);
+//        InventoryGUI gi = GuiHelper.getActiveGuiInventory(player.getUniqueId());
+//        if (gi != null && inv.equals(topInv)) return gi.onItemToInventory(event, player, inv, stack);
         if (Enchantments.hasEnchantment(stack, CustomEnchantment.UnitItem) && inv.getType() != InventoryType.PLAYER)
             return true;
         CustomMaterial cMat = CustomMaterial.getCustomMaterial(stack);
@@ -366,8 +353,8 @@ public class CustomItemListener implements Listener {
         boolean stackEmpty = (stack == null) || stack.getType().equals(Material.AIR);
         if (stackEmpty) return false;
 //        if (Cooldown.isCooldown(stack)) return true;
-        GuiInventory gi = GuiInventory.getActiveGuiInventory(player.getUniqueId());
-        if (gi != null && inv.equals(topInv)) return gi.onItemFromInventory(event, player, inv, stack);
+//        InventoryGUI gi = GuiHelper.getActiveGuiInventory(player.getUniqueId());
+//        if (gi != null && inv.equals(topInv)) return gi.onItemFromInventory(event, player, inv, stack);
         if (Enchantments.hasEnchantment(stack, CustomEnchantment.UnitItem) && inv.getType() != InventoryType.PLAYER)
             return true;
         CustomMaterial cMat = CustomMaterial.getCustomMaterial(stack);
@@ -379,8 +366,8 @@ public class CustomItemListener implements Listener {
         boolean stackEmpty = (stack == null) || stack.getType().equals(Material.AIR);
         if (stackEmpty) return false;
 //        if (Cooldown.isCooldown(stack)) return true;
-        GuiInventory gi = GuiInventory.getActiveGuiInventory(player.getUniqueId());
-        if (gi != null && GuiHelper.isGUIItem(stack)) return true;
+//        InventoryGUI gi = GuiHelper.getActiveGuiInventory(player.getUniqueId());
+//        if (gi != null && GuiHelper.isGUIItem(stack)) return true;
         if (Enchantments.hasEnchantment(stack, CustomEnchantment.UnitItem)) return true;
         CustomMaterial cMat = CustomMaterial.getCustomMaterial(stack);
         if (cMat != null) return cMat.onDropItem(player, stack);

@@ -1,8 +1,7 @@
 package ua.rozipp.core.itemscomponents;
 
 import lombok.Getter;
-import net.kyori.adventure.text.Component;
-import org.bukkit.event.block.BlockPlaceEvent;
+import lombok.Setter;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.ItemSpawnEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
@@ -12,11 +11,14 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerItemDamageEvent;
 import org.bukkit.event.player.PlayerItemHeldEvent;
 import org.bukkit.inventory.ItemStack;
+import org.jetbrains.annotations.NotNull;
 import ua.rozipp.core.config.RConfig;
 import ua.rozipp.core.exception.InvalidConfiguration;
-import ua.rozipp.core.items.ItemStackBuilder;
+import ua.rozipp.core.items.CustomMaterial;
 import ua.rozipp.core.items.ItemChangeResult;
+import ua.rozipp.core.items.ItemStackBuilder;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -27,7 +29,6 @@ public abstract class ItemComponent {
     static {
         register(Attack.class);
         register(BlockPlace.class);
-        register(AllowBlockPlace.class);
         register(ChoiceUnitComponent.class);
         register(Cooldown.class);
         register(Defense.class);
@@ -47,33 +48,32 @@ public abstract class ItemComponent {
         register(OpenGui.class);
     }
 
-    public static Class<? extends ItemComponent> getItemComponentClass(String name) {
-        return components.get(name);
-    }
-
-    private static void register(Class<? extends ItemComponent> aClass){
+    public static void register(Class<? extends ItemComponent> aClass) {
         components.put(aClass.getSimpleName(), aClass);
     }
 
+    public static ItemComponentBuilder builder(CustomMaterial customMaterial) {
+        return new ItemComponentBuilder(customMaterial);
+    }
+
     @Getter
-    private final String name;
+    @Setter
+    private CustomMaterial customMaterial;
 
-    public ItemComponent(RConfig compInfo) throws InvalidConfiguration {
-        this.name = compInfo.getString("name", null, null);
+    public ItemComponent() {
     }
 
-    public Component getDisplayName(){
-        return Component.text(getName());
+    protected void load(RConfig rConfig) throws InvalidConfiguration {
     }
 
-    /*
-    Р’С‹Р·С‹РІР°РµС‚СЊСЃСЏ РїСЂРё СЃРѕР·РґР°РЅРёРё РїСЂРµРґРјРµС‚Р° СЃ РґР°РЅРЅС‹РјРё РєРѕРјРїРѕРЅРµРЅС‚Р°РјРё.
-    РёСЃРїРѕР»СЊР·СѓР№С‚Рµ:
-    - builder.addAttribute();
-    - builder.addLore();
-    - builder.addTag()
+    /**
+     * Вызывается при создании предмета.
+     * используйте:
+     * - builder.addAttribute();
+     * - builder.addLore();
+     * - builder.addTag()
      */
-    public void onPrepareCreate(ItemStackBuilder builder) {
+    public void onSpawnItem(ItemStackBuilder builder) {
     }
 
     // -------- Events
@@ -102,14 +102,33 @@ public abstract class ItemComponent {
     public void onAttack(EntityDamageByEntityEvent event, ItemStack inHand) {
     }
 
-    public boolean onBlockPlaced(BlockPlaceEvent event) {
-        return false;
-    }
-
     public void onInventoryOpen(InventoryOpenEvent event, ItemStack stack) {
     }
 
     public void onHold(PlayerItemHeldEvent event) {
     }
 
+    public static class ItemComponentBuilder {
+        private final CustomMaterial customMaterial;
+
+        public ItemComponentBuilder(@NotNull CustomMaterial customMaterial) {
+            this.customMaterial = customMaterial;
+        }
+
+        public ItemComponent build(RConfig rConfig) throws InvalidConfiguration {
+            try {
+                String className = rConfig.getString("name", null, "[Mid = " + customMaterial.getMid() + "] component's name not found");
+                if (className.isEmpty())
+                    throw new InvalidConfiguration("[Mid = " + customMaterial.getMid() + "] component's name is empty");
+                Class<? extends ItemComponent> cls = components.get(className);
+                ItemComponent itemComponent = cls.getConstructor().newInstance();
+                itemComponent.customMaterial = customMaterial;
+                itemComponent.load(rConfig);
+                return itemComponent;
+            } catch (InstantiationException | IllegalAccessException | InvocationTargetException |
+                     NoSuchMethodException e) {
+                throw new InvalidConfiguration(e.getMessage());
+            }
+        }
+    }
 }

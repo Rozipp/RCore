@@ -18,18 +18,27 @@ import ua.rozipp.core.items.ItemStackBuilder;
 
 public class RangedAttack extends ItemComponent {
 
-    private final double damageValue;
+    private double damageValue;
 
-    public RangedAttack(RConfig compInfo) throws InvalidConfiguration {
-        super(compInfo);
-        damageValue = compInfo.getDouble("value", 1.0, null);
+    public RangedAttack() {
+        super();
+    }
+
+    public RangedAttack(double damageValue) {
+        super();
+        this.damageValue = damageValue;
     }
 
     @Override
-    public void onPrepareCreate(ItemStackBuilder builder) {
+    protected void load(RConfig rConfig) throws InvalidConfiguration {
+        damageValue = rConfig.getDouble("value", 1.0, null);
+    }
+
+    @Override
+    public void onSpawnItem(ItemStackBuilder builder) {
         builder.addLore(Component.text(damageValue)
                 .append(Component.space())
-                .append(Component.translatable("itemLore_RangedAttack"))
+                .append(Component.translatable("item.component.lore.rangedAttack"))
                 .color(NamedTextColor.LIGHT_PURPLE));
     }
 

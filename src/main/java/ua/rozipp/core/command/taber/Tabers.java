@@ -9,8 +9,6 @@ import java.util.List;
 
 public class Tabers {
     public static Taber onlinePlayer = (sender, lastWord) -> {
-        Validate.notNull(sender, "Sender cannot be null");
-
         Player senderPlayer = sender instanceof Player ? (Player) sender : null;
 
         List<String> matchedPlayers = new ArrayList<>();

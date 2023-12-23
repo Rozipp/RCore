@@ -10,10 +10,10 @@ import org.bukkit.inventory.Recipe;
 import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.NotNull;
 import ua.rozipp.core.LogHelper;
-import ua.rozipp.core.PluginHelper;
 import ua.rozipp.core.config.RConfig;
 import ua.rozipp.core.exception.InvalidConfiguration;
 import ua.rozipp.core.items.CustomMaterial;
+import ua.rozipp.core.items.ItemHelper;
 
 import java.util.*;
 
@@ -32,7 +32,7 @@ public class CustomRecipe {
         this.umid = umid;
     }
 
-    public static void load(Plugin plugin, RConfig cfg) throws InvalidConfiguration {
+    public static void loadAll(Plugin plugin, RConfig cfg) throws InvalidConfiguration {
         if (cfg == null) return;
         List<RConfig> configRecipes = cfg.getRConfigList("recipes");
         if (configRecipes == null) return;
@@ -84,7 +84,7 @@ public class CustomRecipe {
         Material material = Material.getMaterial(umid);
         if (material != null)
             return new NamespacedKey(plugin, material.name().toLowerCase(Locale.ROOT) + "-" + recipesKey);
-        return new NamespacedKey(PluginHelper.getCallingPlugin(), recipesKey);
+        return new NamespacedKey(plugin, recipesKey);
     }
 
     public static Collection<CustomRecipe> value() {
@@ -106,6 +106,8 @@ public class CustomRecipe {
 
         public CustomRecipeBuilder loadConfig(RConfig b) throws InvalidConfiguration {
             umid = b.getString("umid_result", null, "Material id_result is Empty");
+            if (ItemHelper.createItemStack(umid, 1).getType().isAir())
+                throw new InvalidConfiguration("Cannot create resipes for umid_result " + umid);
             craftAmount = b.getInt("amount", 1, "");
             return this;
         }

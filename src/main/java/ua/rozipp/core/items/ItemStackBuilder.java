@@ -11,6 +11,7 @@ import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
+import ua.rozipp.core.util.ComponentUtils;
 import ua.rozipp.core.util.TextUtils;
 
 import java.util.*;
@@ -56,7 +57,7 @@ public class ItemStackBuilder {
         }
 
         ItemMeta META = ITEM_STACK.getItemMeta();
-        if (name != null) META.displayName(name);
+        if (name != null) META.displayName(ComponentUtils.translateComponent(name));
         if (lore != null) {
             if (clearLore)
                 META.lore(lore);
@@ -148,31 +149,6 @@ public class ItemStackBuilder {
             lore = new ArrayList<>();
         else
             Collections.addAll(lore, loreLines);
-        return this;
-    }
-
-    @Deprecated
-    public ItemStackBuilder setLore(String[] loreLines) {
-        if (lore == null) lore = new ArrayList<>();
-        for (String s : loreLines)
-            lore.add(Component.text(TextUtils.translateAlternateColorCodes(s)));
-        return this;
-    }
-
-    @Deprecated
-    public ItemStackBuilder setLore(Collection<String> loreLines) {
-        if (lore == null) lore = new ArrayList<>();
-        for (String s : loreLines)
-            lore.add(Component.text(TextUtils.translateAlternateColorCodes(s)));
-        return this;
-    }
-
-    @Deprecated
-    public ItemStackBuilder lore(List<Component> loreLines) {
-        if (lore == null)
-            lore = loreLines;
-        else
-            lore.addAll(loreLines);
         return this;
     }
 

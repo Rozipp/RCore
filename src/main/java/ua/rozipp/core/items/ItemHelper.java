@@ -6,24 +6,18 @@ import net.kyori.adventure.key.Key;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
-import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.Recipe;
 import org.bukkit.inventory.meta.SkullMeta;
-import org.jetbrains.annotations.Nullable;
+import ua.rozipp.core.LogHelper;
 import ua.rozipp.core.config.RConfig;
 import ua.rozipp.core.exception.InvalidConfiguration;
-import ua.rozipp.core.LogHelper;
 
 import java.util.*;
 
 public class ItemHelper {
-
-    public static ItemStack createItemStack(Material mat, int amount) {
-        return new ItemStack(mat, (short) amount);
-    }
 
     public static ItemStack createItemStack(String umid, int amount) {
         if (umid != null && !umid.isEmpty()) {
@@ -34,11 +28,22 @@ public class ItemHelper {
             }
             CustomMaterial cm = CustomMaterial.getCustomMaterial(umid);
             if (cm != null) return cm.spawn(amount);
-            Material material = getMaterial(umid);
+            Material material = Material.getMaterial(umid);
             if (material != null) return new ItemStack(material, amount);
         }
         LogHelper.error("createItemStack() \"" + umid + "\" is not found material");
-        return new ItemStack(Material.AIR, 1);
+        return new ItemStack(Material.AIR);
+    }
+
+    public static ItemStack createItemStack(Key id, int amount) {
+        if (id.namespace().equals(Key.MINECRAFT_NAMESPACE)) {
+            Material material = Material.getMaterial(id.value());
+            if (material != null) return new ItemStack(material, amount);
+        } else {
+            CustomMaterial cMat = CustomMaterial.getCustomMaterial(id);
+            if (cMat != null) return cMat.spawn(amount);
+        }
+        return new ItemStack(Material.AIR);
     }
 
     @SuppressWarnings("deprecation")
@@ -82,7 +87,7 @@ public class ItemHelper {
     /**
      * Возвращает информацию из NBTTag'а под ключем key
      */
-    public static String getNBTTag(NBTItem nbti, String key) {
+    private static String getNBTTag(NBTItem nbti, String key) {
         NBTCompound compound = nbti;
         String k = key;
         if (key.contains(".")) {
@@ -158,24 +163,6 @@ public class ItemHelper {
             }
     }
 
-    public static @Nullable Material getMaterial(String umid) {
-        try {
-            return Material.valueOf(umid.toUpperCase());
-        } catch (IllegalArgumentException ignored) {
-        }
-        return null;
-    }
-
-    /**
-     * Если предмет кастомный, то возвращает его mid.
-     * Если предмет ванильный, то возвращает название материала
-     */
-    public static String getUMid(ItemStack stack) {
-        if (stack == null) return "";
-        Key mid = CustomMaterial.getMid(stack);
-        return (mid != null) ? mid.asString() : stack.getType().toString();
-    }
-
     /**
      * Ложить предмет в заданный слот. Если тот не пустой выбрасывает содержимое слота на пол и ложить предмет.
      * Moves an item stack off of this slot by trying to re-add it to the inventory, if it fails, then we drop it on the ground.
@@ -239,11 +226,15 @@ public class ItemHelper {
         }
     }
 
-    public static int getTypeId(Block block) {
-        return block.getType().getId();
+    public static Key getKey(ItemStack item) {
+        CustomMaterial customMaterial = CustomMaterial.getCustomMaterial(item);
+        return (customMaterial != null) ? customMaterial.getMid() : item.getType().getKey();
     }
 
-    public static int getData(Block block) {
-        return block.getData();
+    public static Material getMaterial(Key key) {
+        if (key.namespace().equals(NamespacedKey.MINECRAFT_NAMESPACE))
+            return Material.getMaterial(key.value().toUpperCase());
+        CustomMaterial customMaterial = CustomMaterial.getCustomMaterial(key);
+        return (customMaterial != null) ? customMaterial.getMaterial() : Material.WHITE_WOOL;
     }
 }

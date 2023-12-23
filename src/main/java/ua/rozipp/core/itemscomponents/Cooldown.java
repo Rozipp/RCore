@@ -11,20 +11,29 @@ import ua.rozipp.core.exception.InvalidConfiguration;
 import ua.rozipp.core.items.ItemStackBuilder;
 
 public class Cooldown extends ItemComponent {
-    private final int cooldownValue;
+    private int cooldownValue;
 
-    public Cooldown(RConfig compInfo) throws InvalidConfiguration {
-        super(compInfo);
-        cooldownValue = compInfo.getInt("cooldown", 0, null);
+    public Cooldown() {
+        super();
+    }
+
+    public Cooldown(int cooldownValue) {
+        super();
+        this.cooldownValue = cooldownValue;
     }
 
     @Override
-    public void onPrepareCreate(ItemStackBuilder builder) {
-        builder.addLore(getDisplayName()
+    protected void load(RConfig rConfig) throws InvalidConfiguration {
+        cooldownValue = rConfig.getInt("cooldown", 0, null);
+    }
+
+    @Override
+    public void onSpawnItem(ItemStackBuilder builder) {
+        builder.addLore(Component.text("Cooldown")
                 .append(Component.space())
                 .append(Component.text(cooldownValue))
                 .color(NamedTextColor.GOLD));
-        builder.addLore(Component.translatable("itemLore_RightClickToUse").color(NamedTextColor.LIGHT_PURPLE));
+        builder.addLore(Component.translatable("item.component.lore.rightClickToUse").color(NamedTextColor.LIGHT_PURPLE));
     }
 
     @Override

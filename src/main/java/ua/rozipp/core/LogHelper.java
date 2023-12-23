@@ -1,6 +1,5 @@
 package ua.rozipp.core;
 
-import lombok.Getter;
 import lombok.Setter;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -26,7 +25,7 @@ public class LogHelper {
 
     public static void info(@NotNull Component message) {
         if (getLogger().isLoggable(Level.INFO))
-            sendConsole(Component.text("[INFO]").append(message.color(NamedTextColor.AQUA)));
+            sendConsole(Component.text("[INFO] ").append(message.color(NamedTextColor.AQUA)));
     }
 
     public static void debug(@NotNull String message) {
@@ -35,7 +34,7 @@ public class LogHelper {
 
     public static void debug(@NotNull Component message) {
         if (getLogger().isLoggable(Level.ALL))
-            sendConsole(Component.text("[DEBUG]").append(message.color(NamedTextColor.DARK_GREEN)));
+            sendConsole(Component.text("[DEBUG] ").append(message.color(NamedTextColor.DARK_GREEN)));
     }
 
     public static void warning(@NotNull String message) {
@@ -71,7 +70,7 @@ public class LogHelper {
     }
 
     private static void sendConsole(Component component) {
-        getConsoleSender().sendMessage(component);
+        MessageHelper.send(getConsoleSender(), component);
     }
 
     private static CommandSender getConsoleSender() {

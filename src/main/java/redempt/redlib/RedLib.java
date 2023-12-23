@@ -3,21 +3,12 @@ package redempt.redlib;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TranslatableComponent;
 import org.bukkit.Bukkit;
-import org.bukkit.Material;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
-import redempt.redlib.commandmanager.ArgType;
-import redempt.redlib.commandmanager.CommandParser;
-import redempt.redlib.commandmanager.Messages;
 import redempt.redlib.config.ConfigManager;
-import redempt.redlib.dev.ChainCommand;
-import redempt.redlib.dev.StructureTool;
-import redempt.redlib.dev.profiler.ProfilerCommands;
 
 import java.io.File;
 import java.lang.reflect.Modifier;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
@@ -64,13 +55,6 @@ public class RedLib extends JavaPlugin {
 	@Override
 	public void onEnable() {
 		ConfigManager.create(this).target(RedLibConfig.class).saveDefaults().load();
-		if (RedLibConfig.devMode) {
-			ChainCommand chain = new ChainCommand();
-			new CommandParser(this.getResource("command.rdcml"))
-					.setArgTypes(ArgType.of("material", Material.class), chain.getArgType())
-					.parse()
-					.register("redlib", new ProfilerCommands(), StructureTool.enable(), chain);
-		}
 	}
 	
 	/**

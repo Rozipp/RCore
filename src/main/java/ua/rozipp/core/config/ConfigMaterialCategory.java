@@ -1,6 +1,7 @@
 package ua.rozipp.core.config;
 
 import net.kyori.adventure.key.Key;
+import ua.rozipp.core.LogHelper;
 import ua.rozipp.core.items.CustomMaterial;
 
 import java.util.Collection;

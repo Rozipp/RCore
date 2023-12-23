@@ -7,15 +7,24 @@ import ua.rozipp.core.items.ItemStackBuilder;
 
 public class NBT extends ItemComponent {
 
-    private final String value;
+    private String value;
 
-    public NBT(RConfig compInfo) throws InvalidConfiguration {
-        super(compInfo);
-        value = compInfo.getString("color", "", null);
+    public NBT() {
+        super();
+    }
+
+    public NBT(String value) {
+        super();
+        this.value = value;
     }
 
     @Override
-    public void onPrepareCreate(ItemStackBuilder builder) {
+    protected void load(RConfig rConfig) throws InvalidConfiguration {
+        value = rConfig.getString("color", "", null);
+    }
+
+    @Override
+    public void onSpawnItem(ItemStackBuilder builder) {
         builder.setColor(Color.fromRGB(Integer.decode("0x" + value)));
 
     }

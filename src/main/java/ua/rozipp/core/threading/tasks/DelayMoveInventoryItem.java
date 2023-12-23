@@ -4,7 +4,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.Cancellable;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
-import redempt.redlib.misc.Task;
+import ua.rozipp.core.Task;
 import ua.rozipp.core.RCore;
 
 /**

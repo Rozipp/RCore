@@ -111,7 +111,7 @@ public class InventorySerializer {
             	}
             	is.setItemMeta(meta);
             } else if (itemAttribute[0].equals("C")) {
-            	CustomMaterial mat = CustomMaterial.getCustomMaterial(new NamespacedKey(RedLib.getCallingPlugin(), itemAttribute[1]));
+            	CustomMaterial mat = CustomMaterial.getCustomMaterial(NamespacedKey.fromString(itemAttribute[1]));
                 //TODO Переделать под ItemStackBuilder
             }
         }

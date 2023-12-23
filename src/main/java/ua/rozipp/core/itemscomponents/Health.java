@@ -10,17 +10,26 @@ import ua.rozipp.core.items.ItemStackBuilder;
 
 public class Health extends ItemComponent {
 
-    private final double healthValue;
+    private double healthValue;
 
-    public Health(RConfig compInfo) throws InvalidConfiguration {
-        super(compInfo);
-        healthValue = compInfo.getDouble("value", 1.0, null);
+    public Health() {
+        super();
+    }
+
+    public Health(double healthValue) {
+        super();
+        this.healthValue = healthValue;
     }
 
     @Override
-    public void onPrepareCreate(ItemStackBuilder builder) {
+    protected void load(RConfig rConfig) throws InvalidConfiguration {
+        healthValue = rConfig.getDouble("value", 1.0, null);
+    }
+
+    @Override
+    public void onSpawnItem(ItemStackBuilder builder) {
         //TODO
-        builder.addLore(Component.text("TODO Р›РµС‡РёС‚ РЅР° " + healthValue, NamedTextColor.BLUE));
+        builder.addLore(Component.text("TODO Лечит на " + healthValue, NamedTextColor.BLUE));
     }
 
     @Override

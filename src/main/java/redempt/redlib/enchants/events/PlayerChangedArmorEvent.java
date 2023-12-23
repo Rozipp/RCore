@@ -6,7 +6,7 @@ import org.bukkit.event.HandlerList;
 import org.bukkit.event.player.PlayerEvent;
 import org.bukkit.inventory.ItemStack;
 import redempt.redlib.RedLib;
-import redempt.redlib.misc.Task;
+import ua.rozipp.core.Task;
 
 /**
  * Called when a player changes any piece of armor
