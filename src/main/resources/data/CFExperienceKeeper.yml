@@ -342,30 +342,30 @@ materials:
             effect_duration: 3600  # тиков на которые выдается еффєкт
             effect_amplifier: 3  # уровень еффєкта
 
-#  - id: 'jake_head'
-#    material: CARVED_PUMPKIN
-#    name: ' &#fbc400С&#fbc800в&#fbcc00е&#facf00т&#fad301и&#fad701л&#fadb01ь&#fadf01н&#f9e201и&#f9e601к &#f9ea01Д&#f9ee01ж&#f9f202е&#f8f502й&#f8f902к&#f8fd02а'
-#    category: CFExperienceKeeper
-#    lore:
-#      - ''
-#      - ' &7Особенность и применение:'
-#      - ' &#f8fd02- при нажатие ПКМ, всем игрокам в радиусе'
-#      - ' &#f8fd02  15 блоков, на которых отсутствует'
-#      - ' &#f8fd02  шлем, надевается Светильник Джека (тыква),'
-#      - ' &#f8fd02  который нельзя снять, на протяжении 15 секунд.'
-#      - ''
-#    glow: false # Включить свечение предмета?
-#    components:
-#      - trigger: 'RIGHT_CLICK'
-#        target: RANGE
-#        target_range: 15
-#        actions:
-#          - name: "JakeHead"
-#            timer: 15 # Время в секундах
-#            message: 'Вы не можете снять тыкву с головы!'
-#      - name: WoldBlackList
-#        worlds: ['spawn'] # Миры в которых нельзя будет юзать взрувную штучку
-#        message: 'В этом мире нельзя использовать Джейка!'
+  #  - id: 'jake_head'
+  #    material: CARVED_PUMPKIN
+  #    name: ' &#fbc400С&#fbc800в&#fbcc00е&#facf00т&#fad301и&#fad701л&#fadb01ь&#fadf01н&#f9e201и&#f9e601к &#f9ea01Д&#f9ee01ж&#f9f202е&#f8f502й&#f8f902к&#f8fd02а'
+  #    category: CFExperienceKeeper
+  #    lore:
+  #      - ''
+  #      - ' &7Особенность и применение:'
+  #      - ' &#f8fd02- при нажатие ПКМ, всем игрокам в радиусе'
+  #      - ' &#f8fd02  15 блоков, на которых отсутствует'
+  #      - ' &#f8fd02  шлем, надевается Светильник Джека (тыква),'
+  #      - ' &#f8fd02  который нельзя снять, на протяжении 15 секунд.'
+  #      - ''
+  #    glow: false # Включить свечение предмета?
+  #    components:
+  #      - trigger: 'RIGHT_CLICK'
+  #        target: RANGE
+  #        target_range: 15
+  #        actions:
+  #          - name: "JakeHead"
+  #            timer: 15 # Время в секундах
+  #            message: 'Вы не можете снять тыкву с головы!'
+  #      - name: WoldBlackList
+  #        worlds: ['spawn'] # Миры в которых нельзя будет юзать взрувную штучку
+  #        message: 'В этом мире нельзя использовать Джейка!'
 
   - id: 'explosive'
     material: FIRE_CHARGE

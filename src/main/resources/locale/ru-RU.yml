@@ -11,7 +11,6 @@ locales:
         enterDouble: '{0}-й аргумент должен быть дробным числом'
         enterPluginName: "Введите название плагина"
         unknownCommand: Непонятная команда
-        commandNotFound: Команда не найдена
         underDevelopment: "Команда находиться в разработке"
         mustBeOnlyAdmin: Эта команда только для админов
         mustBePlayer: Только игрок может использовать эту команду.
@@ -20,6 +19,8 @@ locales:
         description: "Сервисное меню плагина RCore"
         items:
           description: "Меню управления предметами"
+          itemsgui:
+            description: "Открыть гуи выдачи предметов"
         config:
           reloadLocaleSuccess: "Языковые строки для плагина {0} были успешно перезагружены"
 
@@ -48,6 +49,19 @@ locales:
         item_enhanceDesc: adcmd_item_enhanceDesc
       gc: Сборщик мусора явы
       gc_result: Сборщик мусора отработал за [%0] мс.
+    gui:
+      lore:
+        clickToOpen: "&dНажми что бы открыть"
+      CraftingHelp:
+        lore:
+          clickToOpen: "&dНажми что б увидить рецепт"
+        title: "Книга рецептов"
+
+      CraftingHelpCategory:
+        clickForRecipe: "Показать рецепт"
+      button:
+        openInventory:
+          name: "Отрыть категорю {0}"
     item:
       enchantment:
         lore:

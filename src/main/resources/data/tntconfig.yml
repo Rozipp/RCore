@@ -34,12 +34,11 @@ materials:
     category: 'Tools'
     lore:
       - '&fКрафтер, который всегда с тобой'
-      - '&cНажми что бы открыть'
     components:
       - name: 'OpenGui'
         gui_name: PersonalCrafter
       - name: 'BlockPlace'
-        holographicText: "Крафтер2"
+        holographicText: "Крафтер"
         blockcomponents:
           - name: OpenGui
             gui_name: PersonalCrafter
