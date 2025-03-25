@@ -14,7 +14,7 @@ import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
 import redempt.redlib.RedLib;
-import ua.rozipp.core.util.ComponentUtils;
+import ua.rozipp.core.util.TextUtils;
 
 public class ChatPrompt implements Listener {
 	
@@ -87,7 +87,7 @@ public class ChatPrompt implements Listener {
 			return;
 		}
 		event.setCancelled(true);
-		String cancelText = ComponentUtils.componentToString(RedLib.msg("cancelText"), event.getPlayer().locale());
+		String cancelText = TextUtils.componentToString(RedLib.msg("cancelText"), event.getPlayer().locale());
 		if (event.getMessage().equalsIgnoreCase(cancelText)) {
 			p.cancel(CancelReason.PLAYER_CANCELLED);
 			return;

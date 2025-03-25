@@ -27,7 +27,7 @@ public class Health extends ItemComponent {
     }
 
     @Override
-    public void onSpawnItem(ItemStackBuilder builder) {
+    public void onBuildItemStack(ItemStackBuilder builder) {
         //TODO
         builder.addLore(Component.text("TODO Лечит на " + healthValue, NamedTextColor.BLUE));
     }

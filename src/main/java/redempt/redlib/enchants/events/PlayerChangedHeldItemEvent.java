@@ -6,7 +6,7 @@ import org.bukkit.event.HandlerList;
 import org.bukkit.event.player.PlayerEvent;
 import org.bukkit.inventory.ItemStack;
 import redempt.redlib.RedLib;
-import ua.rozipp.core.Task;
+import redempt.redlib.Task;
 
 /**
  * Called when a player changes the item they are holding, or a property of their held item changes

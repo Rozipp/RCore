@@ -14,7 +14,7 @@ public class Tagged extends ItemComponent {
 	}
 
 	public ItemStack addTag(ItemStack src, String tag) {
-		ItemStackBuilder builder = new ItemStackBuilder(src);
+		ItemStackBuilder builder = ItemStackBuilder.of(src);
 		builder.addTag("tag", tag);
 		builder.addLore(Component.text(tag, NamedTextColor.GRAY));
 		return builder.build();

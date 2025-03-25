@@ -8,7 +8,7 @@ import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 import ua.rozipp.core.LogHelper;
 import ua.rozipp.core.MessageHelper;
-import ua.rozipp.core.util.ComponentUtils;
+import ua.rozipp.core.util.TextUtils;
 
 import java.util.*;
 
@@ -31,7 +31,7 @@ public class CommanderRegistration {
             c.setTabCompleter((sender, cmd, label, args) -> customCommand.onTab(sender, label, args));
             if (customCommand.getAliases() != null) c.setAliases(customCommand.getAliases());
             if (customCommand.getDescription() != null)
-                c.setDescription(ComponentUtils.componentToString(customCommand.getDescription()));
+                c.setDescription(TextUtils.componentToString(customCommand.getDescription()));
             if (customCommand.getPermission() != null) c.setPermission(customCommand.getPermission());
             if (customCommand.getPermissionMessage() != null)
                 c.setPermissionMessage(customCommand.getPermissionMessage());

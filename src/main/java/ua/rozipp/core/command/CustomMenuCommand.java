@@ -24,9 +24,9 @@ public abstract class CustomMenuCommand extends CustomCommand {
     protected Component displayName = Component.text("FIXME");
     private final List<CustomCommand> subCommands = new ArrayList<>();
 
-    public CustomMenuCommand(String perentCommand) {
-        super(perentCommand);
-        displayName = Component.text("/" + perentCommand);
+    public CustomMenuCommand(String parentCommand) {
+        super(parentCommand);
+        displayName = Component.text("/" + parentCommand);
         CustomMenuCommand parent = this;
         this.withExecutor((sender, label, args) -> {
             boolean finished = false;
@@ -64,7 +64,7 @@ public abstract class CustomMenuCommand extends CustomCommand {
                 }
             }
         });
-        this.addTab(new MenuCustomTab(this, perentCommand));
+        this.addTab(new MenuCustomTab(this, parentCommand));
     }
 
     public static String[] stripArgs(String[] someArgs, int amount) {

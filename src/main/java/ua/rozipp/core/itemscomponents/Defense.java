@@ -31,7 +31,7 @@ public class Defense extends ItemComponent {
     }
 
     @Override
-    public void onSpawnItem(ItemStackBuilder builder) {
+    public void onBuildItemStack(ItemStackBuilder builder) {
         builder.addLore(Component.text(defValue)
                 .append(Component.space())
                 .append(Component.translatable("item.component.lore.defense"))

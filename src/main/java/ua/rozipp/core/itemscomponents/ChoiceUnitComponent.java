@@ -10,7 +10,7 @@ public class ChoiceUnitComponent extends ItemComponent {
 	}
 
 	@Override
-	public void onSpawnItem(ItemStackBuilder builder) {
+	public void onBuildItemStack(ItemStackBuilder builder) {
 		builder.addLore("<Нажми для выбора>");
 	}
 

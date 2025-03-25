@@ -9,28 +9,36 @@ import java.util.Objects;
 
 /**
  * Represents a world and chunk X and Z
+ *
  * @author Redempt
  */
-public class ChunkPosition {
+public class ChunkPosition implements Cloneable {
 
 	private final int x;
 	private final int z;
-	private final String world;
-	
+	private final String worldName;
+	private World world;
+
 	/**
 	 * Creates a ChunkPosition from a chunk
+	 *
 	 * @param chunk The chunk to create a position for
 	 */
 	public ChunkPosition(Chunk chunk) {
-		this(chunk.getWorld().getName(), chunk.getX(), chunk.getZ());
+		this(chunk.getWorld(), chunk.getX(), chunk.getZ());
 	}
-	
+
 	/**
 	 * Creates a ChunkPosition from a Block
+	 *
 	 * @param block The Block to create a position for
 	 */
 	public ChunkPosition(Block block) {
-		this(new BlockPosition(block));
+		this(block.getWorld(), block.getX() >> 4, block.getZ() >> 4);
+	}
+
+	public ChunkPosition(BlockPosition bPos) {
+		this(bPos.getWorldName(), bPos.getX() >> 4, bPos.getZ() >> 4);
 	}
 
 	/**
@@ -38,16 +46,26 @@ public class ChunkPosition {
 	 *
 	 * @param x     The chunk X
 	 * @param z     The chunk Z
-	 * @param world The world name
+	 * @param world The world
 	 */
-	public ChunkPosition(String world, int x, int z) {
+	public ChunkPosition(World world, int x, int z) {
 		this.x = x;
 		this.z = z;
 		this.world = world;
+		this.worldName = world.getName();
 	}
 
-	public ChunkPosition(BlockPosition bPos) {
-		this(bPos.getWorldName(), bPos.getX() >> 4, bPos.getZ() >> 4);
+	/**
+	 * Creates a ChunkPosition from chunk coordinates and a world name
+	 *
+	 * @param x         The chunk X
+	 * @param z         The chunk Z
+	 * @param worldName The world name
+	 */
+	public ChunkPosition(String worldName, int x, int z) {
+		this.x = x;
+		this.z = z;
+		this.worldName = worldName;
 	}
 
 	/**
@@ -63,41 +81,47 @@ public class ChunkPosition {
 	public int getZ() {
 		return z;
 	}
-	
+
 	/**
 	 * @return The world this ChunkPosition is in
 	 */
 	public World getWorld() {
-		return Bukkit.getWorld(world);
+		if (world == null)
+			world = Bukkit.getWorld(worldName);
+		return world;
 	}
 	
 	/**
 	 * @return The name of the world this ChunkPosition is in
 	 */
 	public String getWorldName() {
-		return world;
+		return worldName;
 	}
-	
+
 	@Override
 	public int hashCode() {
-		return Objects.hash(x, z, world);
+		return Objects.hash(x, z, worldName);
 	}
-	
+
 	@Override
 	public String toString() {
-		return world + " " + x + " " + z;
+		return worldName + " " + x + " " + z;
 	}
 
 	@Override
 	public boolean equals(Object o) {
-		if (!(o instanceof ChunkPosition)) {
+		if (!(o instanceof ChunkPosition pos)) {
 			return false;
 		}
-		ChunkPosition pos = (ChunkPosition) o;
-		return pos.x == x && pos.z == z && world.equals(pos.world);
+		return pos.x == x && pos.z == z && worldName.equals(pos.worldName);
+	}
+
+	@Override
+	protected Object clone() throws CloneNotSupportedException {
+		return new ChunkPosition(this.getWorldName(), this.getX(), this.getZ());
 	}
 
 	public Chunk getChunk() {
 		return getWorld().getChunkAt(getX(), getZ());
-    }
+	}
 }

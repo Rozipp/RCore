@@ -2,6 +2,9 @@ package ua.rozipp.core.util;
 
 import org.bukkit.ChatColor;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 public class StringUtils {
 
     /** в строку string добавляет строку addString, если длина строки addString менше чем length, то добавляет пробелы */

@@ -1,0 +1,162 @@
+# materials: - раздел для описания кастомных предметов
+#
+#   id -Уникальное имя предмета.
+#   material - Вид предмета от этого материала
+#   name - Отображаемое название предмета
+#   category - категория используется для книги рецептов (необязательная)
+#   lore - описание предмета. Список строк
+#   components - список компонентов с их параметрами
+#      name - внутреннее имя компонента
+#
+#   BlockPlace - компонент предмета, который позволяет поставить кастомный блок. У него в свою очередь есть свои параметры и свои blockcomponents
+#     Параметры:
+#       material: материал предмета, с которого берется модель блока в мире. По умолчанию тото же материал, что и у предмета
+#       Возможные blockcomponents:
+#       1) TNTExplode - компонент взрыва.
+#          Параметры:
+#            glowing - свечение зажжённого ТНТ;
+#            fire - вызывает ли взрыв пожар
+#            interval - время горения фитиля;
+#            range - радиус разлета осколков
+#            gravity - При false подоженная тнт будет подлетать не чуствую гравитации
+#            obsidian_break - разрушаєт ли обсидиан
+#       2) TNTObsidian - ломает обсидиана в радиусе взрыва. (БАГ: проверяєт все блоки в радиусе сферы, и не зависит от траектории осколков)
+#       3) TNTJumper - перед взрывом тнт поднимает вверх до упора в твердый блок
+#       4) TNTFrozen - в радиусе взрыва все блоки воды замораживаются. Нежелательно совмещать с TNTExplode
+#          Параметры:
+#            range - радиус замораживания
+
+
+materials:
+  - id: 'mat_personal_crafter'
+    material: CRAFTING_TABLE
+    name: 'Персональный крафтер'
+    category: 'Tools'
+    lore:
+      - '&fКрафтер, который всегда с тобой'
+      - '&cНажми что бы открыть'
+    components:
+      - name: 'OpenGui'
+        gui_name: PersonalCrafter
+      - name: 'BlockPlace'
+        holographicText: "Крафтер2"
+        blockcomponents:
+          - name: OpenGui
+            gui_name: PersonalCrafter
+
+  - id: 'mat_super_tnt'
+    material: TNT
+    name: 'Супер тнт'
+    category: 'TNT'
+    lore:
+      - '&cРадиус: 10 блоков'
+      - '&cИнтервал: 3 сек'
+    components:
+      - name: 'BlockPlace'
+        holographicText: "Супер тнт"
+        blockcomponents:
+          - name: TNTExplode
+            interval: 3
+            range: 10
+
+  - id: 'mat_mega_tnt'
+    material: TNT
+    name: 'Мега тнт'
+    category: 'TNT'
+    lore:
+      - '&cРадиус: 15 блоков'
+      - '&cИнтервал: 5 сек'
+    components:
+      - name: 'BlockPlace'
+        holographicText: "Мега тнт"
+        blockcomponents:
+          - name: TNTExplode
+            interval: 5
+            range: 15
+            obsidian_break: true
+
+  - id: 'mat_ultra_tnt'
+    material: TNT
+    name: 'Ультра тнт'
+    category: 'TNT'
+    lore:
+      - '&cРадиус: 20 блоков'
+      - '&cИнтервал: 8 сек'
+    components:
+      - name: 'BlockPlace'
+        holographicText: "Ультра тнт"
+        blockcomponents:
+          - name: TNTExplode
+            interval: 8
+            range: 20
+
+  - id: 'mat_jumper_tnt'
+    material: TNT
+    name: 'Прыгающая тнт'
+    category: 'TNT'
+    lore:
+      - '&cРадиус: 10 блоков'
+      - '&cИнтервал: 3 сек'
+    components:
+      - name: 'BlockPlace'
+        holographicText: "Прыгающая тнт"
+        blockcomponents:
+          - name: TNTExplode
+            interval: 1
+            range: 5
+            gravity: false
+
+  - id: 'mat_frozen_tnt'
+    material: TNT
+    name: 'ТНТ Заморозка'
+    category: 'TNT'
+    lore:
+      - '&cРадиус: 10 блоков'
+      - '&cИнтервал: 3 сек'
+    components:
+      - name: 'BlockPlace'
+        holographicText: "ТНТ Заморозка"
+        material: PACKED_ICE
+        blockcomponents:
+          - name: TNTFrozen
+            range: 10
+
+
+# Раздел позволяет добавить любые кастомные рецепты
+# umid (universal material identifier) - универсальный идентификатор предмета. Может быть как ванильным материалом, так и любим из кастомных предметов на базе плагина RCore.
+# Например: COBBLESTONE, minecraft:oak_log, rcore:mat_leather, bantnt:mat_super_tnt
+#
+#   umid_result - идентификатор предмета-результата
+#   ingredients - список ингредиентов
+#     umid - идентификатор ингредиента
+#     letter - буква которой заменяется ингредиент в разделе shape (только для рецептов с сеткой крафта (Shaped Recipe))
+#     count - нужное количество предметов (только для предметов без сетки крафта (Shapeless Recipe))
+#   shape - сетка крафта. Записывается списком из трех строк, по 3 буквы, буквами-заменителями (letter) из раздела ингредиентов.
+#           Если этого раздела нет, то рецепт считается рецептом без сетки крафта (Shapeless Recipe)
+
+
+recipes:
+  - umid_result: 'mat_super_tnt'
+    ingredients:
+      - umid: 'TNT'
+        letter: 't'
+    shape:
+      - "ttt"
+      - "   "
+      - "   "
+  - umid_result: 'mat_mega_tnt'
+    ingredients:
+      - umid: 'mat_super_tnt'
+        letter: 's'
+    shape:
+      - "sss"
+      - "   "
+      - "   "
+  - umid_result: 'mat_ultra_tnt'
+    ingredients:
+      - umid: 'mat_mega_tnt'
+        letter: 'c'
+    shape:
+      - "ccc"
+      - "   "
+      - "   "

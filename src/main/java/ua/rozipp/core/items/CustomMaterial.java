@@ -6,11 +6,13 @@ import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
+import org.bukkit.Color;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Cancellable;
+import org.bukkit.event.Event;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.*;
 import org.bukkit.event.inventory.CraftItemEvent;
@@ -24,6 +26,8 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.inventory.meta.LeatherArmorMeta;
+import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -31,8 +35,11 @@ import ua.rozipp.core.LogHelper;
 import ua.rozipp.core.MessageHelper;
 import ua.rozipp.core.config.RConfig;
 import ua.rozipp.core.exception.InvalidConfiguration;
+import ua.rozipp.core.itemscomponents.BlockPlace;
 import ua.rozipp.core.itemscomponents.ItemComponent;
+import ua.rozipp.core.itemscomponents.OpenGui;
 import ua.rozipp.core.recipes.CustomRecipe;
+import ua.rozipp.core.util.TextUtils;
 
 import java.util.*;
 
@@ -45,13 +52,17 @@ public class CustomMaterial {
     protected @NotNull Material material;
     protected @NotNull String name;
     protected @Nullable List<String> lore;
-    protected boolean shiny = false;
+    protected Color color;
+    protected boolean glow = false;
     protected int tradeValue = 0;
     protected boolean vanilla;
     protected String category = "";
     protected int tier;
     private final List<CustomRecipe> recipes = new ArrayList<>();
-    public Map<Class<? extends ItemComponent>, ItemComponent> components = new HashMap<>();
+    public List<ItemComponent> lowComponents = new ArrayList<>();
+    public List<ItemComponent> normalComponents = new ArrayList<>();
+    public List<ItemComponent> highComponents = new ArrayList<>();
+    public Map<Class<? extends ItemComponent>, ItemComponent> components;
 
     protected CustomMaterial(@NotNull Key mid, @NotNull Material material, @NotNull String name) {
         this.mid = mid;
@@ -63,7 +74,7 @@ public class CustomMaterial {
     /**
      * Возвращает CustomMaterial если у предмета есть NBTTag "PRIFIX.mid", иначе null
      */
-    public static CustomMaterial getCustomMaterial(ItemStack stack) {
+    public static @Nullable CustomMaterial getCustomMaterial(ItemStack stack) {
         if (stack == null || stack.getType().isAir() || stack.getAmount() == 0) return null;
         return getCustomMaterial(getMid(stack));
     }
@@ -139,9 +150,9 @@ public class CustomMaterial {
         if (components != null) {
             for (RConfig compInfo : components) {
                 try {
-                    addComponent(ItemComponent.builder(this).build(compInfo));
+                    addComponent(ItemComponent.builder(this).load(compInfo).build());
                 } catch (InvalidConfiguration e) {
-                    LogHelper.error(e.getMessage());
+                    LogHelper.error(Component.text("[Mid = " + this.getMid() + "] ", NamedTextColor.DARK_PURPLE).append(e.getComponent().color(NamedTextColor.GOLD)));
                 }
             }
         }
@@ -149,34 +160,58 @@ public class CustomMaterial {
 
     public void addComponent(ItemComponent component) {
         if (component != null) {
-            this.components.put(component.getClass(), component);
+            if (component.getPriority() == ItemComponent.Priority.LOW)
+                this.lowComponents.add(component);
+            if (component.getPriority() == ItemComponent.Priority.NORMAL)
+                this.normalComponents.add(component);
+            if (component.getPriority() == ItemComponent.Priority.HIGH)
+                this.highComponents.add(component);
         }
     }
 
     public boolean hasComponent(Class<? extends ItemComponent> aClass) {
-        return this.components.containsKey(aClass);
+        return getComponents().containsKey(aClass);
     }
 
     @SuppressWarnings("unchecked")
     public <T extends ItemComponent> T getComponent(Class<T> aClass) {
-        return (T) this.components.get(aClass);
+        return (T) this.getComponents().get(aClass);
     }
 
-    public Collection<ItemComponent> getComponents() {
-        return this.components.values();
+    public Map<Class<? extends ItemComponent>, ItemComponent> getComponents() {
+        if (components == null) {
+            components = new HashMap<>();
+            lowComponents.forEach(itemComponent -> components.put(itemComponent.getClass(), itemComponent));
+            normalComponents.forEach(itemComponent -> components.put(itemComponent.getClass(), itemComponent));
+            highComponents.forEach(itemComponent -> components.put(itemComponent.getClass(), itemComponent));
+        }
+        return components;
     }
-
-    // ------------------
 
     //---------------- events -------------
     public void onInteract(PlayerInteractEvent event) {
-        for (ItemComponent ic : getComponents()) {
-            ic.onInteract(event);
+        ItemComponent blockPlace = null;
+        ItemComponent openGui = null;
+        for (ItemComponent ic : getComponents().values()) {
+            if (ic instanceof BlockPlace)
+                blockPlace = ic;
+            else if (ic instanceof OpenGui)
+                openGui = ic;
+            else
+                ic.onInteract(event);
+        }
+
+        if (event.useInteractedBlock() != Event.Result.DENY && blockPlace != null) {
+            blockPlace.onInteract(event);
+        }
+        if (event.useItemInHand() != Event.Result.DENY && openGui != null) {
+            openGui.onInteract(event);
         }
     }
 
     public void onHeld(PlayerItemHeldEvent event) {
-        for (ItemComponent comp : getComponents()) {
+        for (ItemComponent comp : getComponents().values()) {
+            if (event.isCancelled() && !comp.isCanselIgnore()) continue;
             comp.onHold(event);
         }
     }
@@ -186,14 +221,23 @@ public class CustomMaterial {
     }
 
     public void onItemSpawn(ItemSpawnEvent event) {
-        for (ItemComponent comp : getComponents()) {
+        for (ItemComponent comp : getComponents().values()) {
+            if (event.isCancelled() && !comp.isCanselIgnore()) continue;
             comp.onItemSpawn(event);
         }
     }
 
     public void onAttack(EntityDamageByEntityEvent event, ItemStack stack) {
-        for (ItemComponent comp : getComponents()) {
+        for (ItemComponent comp : getComponents().values()) {
+            if (event.isCancelled() && !comp.isCanselIgnore()) continue;
             comp.onAttack(event, stack);
+        }
+    }
+
+    public void onProjectileHit(ProjectileHitEvent event) {
+        for (ItemComponent comp : getComponents().values()) {
+            if (event.isCancelled() && !comp.isCanselIgnore()) continue;
+            comp.onProjectileHit(event);
         }
     }
 
@@ -210,39 +254,38 @@ public class CustomMaterial {
     }
 
     public void onDefense(EntityDamageByEntityEvent event, ItemStack stack) {
-        for (ItemComponent comp : getComponents()) {
+        for (ItemComponent comp : getComponents().values()) {
+            if (event.isCancelled() && !comp.isCanselIgnore()) continue;
             comp.onDefense(event, stack);
         }
     }
 
     public void onDurabilityChange(PlayerItemDamageEvent event) {
-        for (ItemComponent comp : getComponents()) {
+        for (ItemComponent comp : getComponents().values()) {
+            if (event.isCancelled() && !comp.isCanselIgnore()) continue;
             comp.onDurabilityChange(event);
         }
     }
 
     public void onPlayerInteractEntityEvent(PlayerInteractEntityEvent event) {
-        for (ItemComponent comp : getComponents()) {
+        for (ItemComponent comp : getComponents().values()) {
+            if (event.isCancelled() && !comp.isCanselIgnore()) continue;
             comp.onPlayerInteractEntity(event);
-        }
-    }
-
-    public void onRangedAttack(EntityDamageByEntityEvent event, ItemStack inHand) {
-        for (ItemComponent comp : getComponents()) {
-            comp.onRangedAttack(event, inHand);
         }
     }
 
     public ItemChangeResult onDurabilityDeath(PlayerDeathEvent event, ItemStack stack) {
         ItemChangeResult result = null;
-        for (ItemComponent comp : getComponents()) {
+        for (ItemComponent comp : getComponents().values()) {
+            if (event.isCancelled() && !comp.isCanselIgnore()) continue;
             result = comp.onDurabilityDeath(event, result, stack);
         }
         return result;
     }
 
     public void onInventoryOpen(InventoryOpenEvent event, ItemStack stack) {
-        for (ItemComponent comp : getComponents()) {
+        for (ItemComponent comp : getComponents().values()) {
+            if (event.isCancelled() && !comp.isCanselIgnore()) continue;
             comp.onInventoryOpen(event, stack);
         }
     }
@@ -287,20 +330,24 @@ public class CustomMaterial {
     }
 
     public ItemStack spawn(int amount) {
-        ItemStackBuilder builder = new ItemStackBuilder(this.material);
+        ItemStackBuilder builder = ItemStackBuilder.of(this.material);
         builder.addTag(TAGMANE, this.getMid().asString());
-        builder.name(Component.text(this.getName(), NamedTextColor.WHITE).decoration(TextDecoration.ITALIC, false));
+        builder.name(Component.text(TextUtils.translateHexColor(this.getName()), NamedTextColor.WHITE).decoration(TextDecoration.ITALIC, false));
         builder.addLore(Component.text(this.category, NamedTextColor.DARK_PURPLE).decoration(TextDecoration.ITALIC, false));
         if (this.getLore() != null)
-            this.getLore().forEach(s -> builder.addLore(Component.text(s, NamedTextColor.WHITE).decoration(TextDecoration.ITALIC, false)));
+            this.getLore().forEach(s -> builder.addLore(Component.text(TextUtils.translateHexColor(s), NamedTextColor.WHITE).decoration(TextDecoration.ITALIC, false)));
 
-        getComponents().forEach(comp -> comp.onSpawnItem(builder));
+        getComponents().forEach((aClass, comp) -> comp.onBuildItemStack(builder));
 
         builder.setAmount(amount);
 
         ItemStack stack = builder.build();
         ItemMeta meta = stack.getItemMeta();
-        if (shiny) meta.addEnchant(Enchantment.LURE, 1, false);
+        if (color != null) {
+            if (meta instanceof PotionMeta) ((PotionMeta) meta).setColor(color);
+            if (meta instanceof LeatherArmorMeta) ((LeatherArmorMeta) meta).setColor(color);
+        }
+        if (glow) meta.addEnchant(Enchantment.LURE, 1, false);
         meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
         meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
         stack.setItemMeta(meta);

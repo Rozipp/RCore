@@ -36,6 +36,7 @@ public abstract class TNTAbstract extends BlockComponent {
 //            block.setBlockData(Material.AIR.createBlockData());
 
             TNTPrimed tNTPrimedNew = (TNTPrimed) block.getWorld().spawnEntity(block.getLocation().toCenterLocation(), EntityType.PRIMED_TNT);
+            if (type == null) return tNTPrimedNew;
             tNTPrimedNew.getPersistentDataContainer().set(KEY, PersistentDataType.STRING, type.getId().asString());
             return tNTPrimedNew;
         } else

@@ -16,8 +16,8 @@ import java.util.concurrent.CompletableFuture;
  */
 public class BlockDataManagerChunk extends BlockDataManager {
 
-    BlockDataManagerChunk(Plugin plugin, BlockDataBackend backend, boolean autoLoad, boolean events) {
-        super(plugin, backend, autoLoad, events);
+    BlockDataManagerChunk(Plugin plugin, BlockDataBackend backend, boolean autoLoad) {
+        super(plugin, backend, autoLoad);
     }
 
     @Override

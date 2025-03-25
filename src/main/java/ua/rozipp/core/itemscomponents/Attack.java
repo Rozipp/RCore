@@ -3,6 +3,7 @@ package ua.rozipp.core.itemscomponents;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.attribute.Attribute;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent.DamageModifier;
 import org.bukkit.inventory.ItemStack;
@@ -15,6 +16,8 @@ import ua.rozipp.core.enchantment.PoisonEnchantment;
 import ua.rozipp.core.exception.InvalidConfiguration;
 import ua.rozipp.core.items.AttributeModifierBuilder;
 import ua.rozipp.core.items.ItemStackBuilder;
+
+import java.util.Collection;
 
 public class Attack extends ItemComponent {
 
@@ -35,7 +38,7 @@ public class Attack extends ItemComponent {
 	}
 
 	@Override
-	public void onSpawnItem(ItemStackBuilder builder) {
+	public void onBuildItemStack(ItemStackBuilder builder) {
 		// Add generic attack damage to 0 to clear the default lore on item.
 		builder.addAttribute(Attribute.GENERIC_ATTACK_DAMAGE,
 				AttributeModifierBuilder.newBuilder()

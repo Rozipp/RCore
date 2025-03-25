@@ -26,20 +26,6 @@ public class WeightedRandom<T> {
 	 * @param <T> The type of the outcomes
 	 * @return A WeightedRandom which can be used to roll for the given outcome
 	 */
-	public static <T> WeightedRandom<T> fromIntMap(Map<T, Integer> map) {
-		HashMap<T, Double> dmap = new HashMap<>();
-		map.forEach((k, v) -> {
-			dmap.put(k, (double) v);
-		});
-		return new WeightedRandom<T>(dmap, false);
-	}
-	
-	/**
-	 * Create a new WeightedRandom from a map of outcomes to their weights
-	 * @param map The map of outcomes to their weights
-	 * @param <T> The type of the outcomes
-	 * @return A WeightedRandom which can be used to roll for the given outcome
-	 */
 	public static <T> WeightedRandom<T> fromDoubleMap(Map<T, Double> map) {
 		return new WeightedRandom<T>(map, false);
 	}
@@ -64,7 +50,6 @@ public class WeightedRandom<T> {
 	/**
 	 * Creates a WeightedRandom using the map of weights
 	 * @param weights The map of outcomes to weights
-	 * @deprecated Use {@link WeightedRandom#fromIntMap(Map)}
 	 */
 	public WeightedRandom(Map<T, Integer> weights) {
 		HashMap<T, Double> dmap = new HashMap<>();
@@ -220,16 +205,6 @@ public class WeightedRandom<T> {
 			map.put(outcome, weight);
 		}
 		return fromDoubleMap(map);
-	}
-	
-	/**
-	 * Performs a single roll given a map of outcomes to weights. If you need to roll multiple times, instantiate a WeightedRandom and call roll on that each time instead.
-	 * @param map The map of outcomes to weights
-	 * @param <T> The type being returned
-	 * @return A weighted random outcome
-	 */
-	public static <T> T roll(Map<T, Integer> map) {
-		return new WeightedRandom<T>(map).roll();
 	}
 	
 }

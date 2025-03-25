@@ -7,10 +7,7 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.TNTPrimed;
-import org.bukkit.event.Cancellable;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.EventPriority;
-import org.bukkit.event.Listener;
+import org.bukkit.event.*;
 import org.bukkit.event.block.*;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
@@ -23,14 +20,13 @@ import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.Plugin;
 import redempt.redlib.misc.EventListener;
 import redempt.redlib.misc.Path;
-import ua.rozipp.core.LogHelper;
+import ua.rozipp.core.PluginHelper;
 import ua.rozipp.core.blockdata.BlockDataManager;
 import ua.rozipp.core.blockdata.DataBlock;
 import ua.rozipp.core.blockdata.events.*;
 import ua.rozipp.core.blockscomponents.BlockComponent;
 import ua.rozipp.core.blockscomponents.TNTAbstract;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -54,39 +50,45 @@ public class CustomBlockListener implements Listener {
         onEventCancel(MoistureChangeEvent.class, EventPriority.LOWEST);
         onEventCancel(SignChangeEvent.class, EventPriority.LOWEST);
         onEventCancel(SpongeAbsorbEvent.class, EventPriority.LOWEST);
-
-        onEvent(BlockBurnEvent.class, EventPriority.HIGHEST);
-        onEvent(BlockCookEvent.class, EventPriority.HIGHEST);
-        onEvent(BlockDamageEvent.class, EventPriority.HIGHEST);
-        onEvent(BlockDispenseEvent.class, EventPriority.HIGHEST);
-        onEvent(BlockExplodeEvent.class, EventPriority.HIGHEST);
-        onEvent(BlockRedstoneEvent.class, EventPriority.HIGHEST);
     }
 
     public <T extends BlockEvent> void onEventCancel(Class<T> event, EventPriority priority) {
         new EventListener<>(plugin, event, priority, e -> {
             if (e instanceof Cancellable && registry.getCustomBlockType(e.getBlock()) != null) {
-                LogHelper.debug("Event \"" + event.getSimpleName() + "\" is cancelled");
+//                LogHelper.debug("Event \"" + event.getSimpleName() + "\" is cancelled");
                 ((Cancellable) e).setCancelled(true);
             }
         });
     }
 
-    public <T extends BlockEvent> void onEvent(Class<T> event, EventPriority priority) {
-        new EventListener<>(plugin, event, priority, e -> {
-            if (e instanceof Cancellable && ((Cancellable) e).isCancelled()) return;
-            CustomBlockType type = registry.getCustomBlockType(e.getBlock());
-            if (type != null) {
-                type.getComponents().forEach(comp -> {
-                    try {
-                        BlockComponent.class.getMethod(event.getSimpleName(), event).invoke(comp, e);
-                        LogHelper.debug("onEvent \"" + event.getSimpleName() + "\" is run");
-                    } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException error) {
-                        LogHelper.error("Event Method error \"" + event.getSimpleName() + "\"");
-                    }
-                });
-            }
-        });
+    @EventHandler(priority = EventPriority.LOWEST)
+    public void onBlockBurnEvent(BlockBurnEvent event) {
+        CustomBlockType type = registry.getCustomBlockType(event.getBlock());
+        if (type != null) type.getComponents().forEach(comp -> comp.onBlockBurnEvent(event));
+    }
+
+    @EventHandler(priority = EventPriority.LOWEST)
+    public void onBlockDamageEvent(BlockDamageEvent event) {
+        CustomBlockType type = registry.getCustomBlockType(event.getBlock());
+        if (type != null) type.getComponents().forEach(comp -> comp.onBlockDamageEvent(event));
+    }
+
+    @EventHandler(priority = EventPriority.LOWEST)
+    public void onBlockDispenseEvent(BlockDispenseEvent event) {
+        CustomBlockType type = registry.getCustomBlockType(event.getBlock());
+        if (type != null) type.getComponents().forEach(comp -> comp.onBlockDispenseEvent(event));
+    }
+
+    @EventHandler(priority = EventPriority.LOWEST)
+    public void onBlockExplodeEvent(BlockExplodeEvent event) {
+        CustomBlockType type = registry.getCustomBlockType(event.getBlock());
+        if (type != null) type.getComponents().forEach(comp -> comp.onBlockExplodeEvent(event));
+    }
+
+    @EventHandler(priority = EventPriority.LOWEST)
+    public void onBlockRedstoneEvent(BlockRedstoneEvent event) {
+        CustomBlockType type = registry.getCustomBlockType(event.getBlock());
+        if (type != null) type.getComponents().forEach(comp -> comp.onBlockRedstoneEvent(event));
     }
 
     @EventHandler
@@ -109,7 +111,7 @@ public class CustomBlockListener implements Listener {
             CustomBlockType type = registry.getCustomBlockType(block);
             if (type != null) {
                 e.setCancelled(true);
-                Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, () -> {
+                PluginHelper.sync(plugin).run(() -> {
                     ItemStack item = type.getItem();
                     for (int i = 0; i < 9; i++) {
                         if (item.isSimilar(e.getWhoClicked().getInventory().getItem(i))) {
@@ -125,12 +127,13 @@ public class CustomBlockListener implements Listener {
 
     @EventHandler(priority = EventPriority.LOWEST)
     public void onPlayerInteractEvent(PlayerInteractEvent event) {
-        if (event.getClickedBlock() != null) {
+        if (event.getClickedBlock() != null && event.useInteractedBlock() != Event.Result.DENY) {
             CustomBlockType type = registry.getCustomBlockType(event.getClickedBlock());
-            if (type != null)
+            if (type != null) {
                 for (BlockComponent comp : type.getComponents()) {
                     comp.onInteract(event);
                 }
+            }
         }
     }
 
@@ -141,7 +144,6 @@ public class CustomBlockListener implements Listener {
         CustomBlockType type = registry.getCustomBlockType(db);
         if (db != null && type != null) {
             TNTPrimed tntPrimed = null;
-            LogHelper.debug("onTNTPrime type.getComponents(): " + type.getComponents().size());
             for (BlockComponent comp : type.getComponents()) {
                 tntPrimed = comp.onTNTPrime(event, tntPrimed);
             }

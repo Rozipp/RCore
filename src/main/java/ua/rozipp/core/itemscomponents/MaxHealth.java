@@ -24,7 +24,7 @@ public class MaxHealth extends ItemComponent {
     }
 
     @Override
-    public void onSpawnItem(ItemStackBuilder builder) {
+    public void onBuildItemStack(ItemStackBuilder builder) {
         builder.addAttribute(Attribute.GENERIC_MAX_HEALTH,
                 AttributeModifierBuilder.newBuilder().name("Health").
                         amount(healthValue).

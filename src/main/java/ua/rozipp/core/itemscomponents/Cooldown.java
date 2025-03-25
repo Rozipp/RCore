@@ -28,7 +28,7 @@ public class Cooldown extends ItemComponent {
     }
 
     @Override
-    public void onSpawnItem(ItemStackBuilder builder) {
+    public void onBuildItemStack(ItemStackBuilder builder) {
         builder.addLore(Component.text("Cooldown")
                 .append(Component.space())
                 .append(Component.text(cooldownValue))

@@ -2,10 +2,12 @@ package ua.rozipp.core.itemscomponents;
 
 import net.kyori.adventure.key.Key;
 import org.bukkit.Bukkit;
+import org.bukkit.GameMode;
 import org.bukkit.NamespacedKey;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.entity.Player;
+import org.bukkit.event.Event;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
@@ -44,8 +46,8 @@ public class BlockPlace extends ItemComponent {
     }
 
     @Override
-    public void onSpawnItem(ItemStackBuilder builder) {
-        super.onSpawnItem(builder);
+    public void onBuildItemStack(ItemStackBuilder builder) {
+        super.onBuildItemStack(builder);
     }
 
     @Override
@@ -53,22 +55,27 @@ public class BlockPlace extends ItemComponent {
         if (e.getAction().equals(Action.RIGHT_CLICK_BLOCK)
                 && e.getClickedBlock() != null
                 && getCustomBlock() != null
-                && !e.getItem().getType().isBlock()) {
+                && e.useInteractedBlock() == Event.Result.ALLOW
+                && !e.getItem().getType().isBlock()
+                && e.getHand() != null) {
             Player player = e.getPlayer();
-            ItemStack item = player.getInventory().getItemInMainHand();
+            ItemStack item = (e.getHand() == EquipmentSlot.HAND)
+                    ? player.getInventory().getItemInMainHand()
+                    : player.getInventory().getItemInOffHand();
 
             Block placed = e.getClickedBlock().getRelative(e.getBlockFace());
             BlockState state = placed.getState();
             Block against = e.getClickedBlock();
 
-            BlockPlaceEvent event = new BlockPlaceEvent(placed, state, against, item, player, true, EquipmentSlot.HAND);
+            BlockPlaceEvent event = new BlockPlaceEvent(placed, state, against, item, player, true, e.getHand());
             Bukkit.getPluginManager().callEvent(event);
 
             if (!event.isCancelled()) {
-//                placed.setType(item.getType());
-//                if (player.getGameMode() != GameMode.CREATIVE)
-//                    item.setAmount(item.getAmount() - 1);
+                if (player.getGameMode() != GameMode.CREATIVE)
+                    item.setAmount(item.getAmount() - 1);
             }
+            e.setUseInteractedBlock(Event.Result.DENY);
+            e.setUseItemInHand(Event.Result.DENY);
         }
     }
 

@@ -2,15 +2,17 @@ package ua.rozipp.core.guiinventory;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
-import org.bukkit.Bukkit;
-import org.bukkit.entity.Player;
-import ua.rozipp.core.exception.GuiException;
-import ua.rozipp.core.gui.InventoryGUI;
+import ua.rozipp.core.gui.RGui;
+import ua.rozipp.core.gui.RGuiImp;
 
-public class BookGUI extends InventoryGUI {
+public class BookGUI extends RGuiImp {
 
-	public BookGUI(Player player, String arg) throws GuiException {
-		super(Bukkit.createInventory(null, 3 * 9, Component.translatable("bookReborn_heading", NamedTextColor.GREEN)));
+	public BookGUI(Object arg) {
+		super(3, Component.translatable("bookReborn_heading", NamedTextColor.GREEN));
+	}
+
+	@Override
+    public void onUpdate() {
 		/*
 		this.addGuiItem(0, GuiItemBuilder.guiItemBuilder(Material.SKELETON_SKULL)//
 				.setOpenInventory(ResidentPage.class, null)//

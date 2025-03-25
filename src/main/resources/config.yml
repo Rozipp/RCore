@@ -1,5 +1,5 @@
 server_locale: ru_RU
-loger_level: ALL
+logger_level: ALL
 
 # Конфигурация подключения к БД
 database:

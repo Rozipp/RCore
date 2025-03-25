@@ -14,5 +14,6 @@ public class RCoreMenu extends CustomMenuCommand {
         add(new RCoreConfigMenu());
         add(new RCoreLocaleMenu());
         add(new RCoreLoggerMenu());
+        add(new RCoreGuiMenu());
     }
 }

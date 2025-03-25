@@ -11,6 +11,7 @@ import ua.rozipp.core.blockscomponents.BlockHologram;
 import ua.rozipp.core.command.rcoremenu.RCoreMenu;
 import ua.rozipp.core.config.RConfigMultiFiles;
 import ua.rozipp.core.exception.InvalidConfiguration;
+import ua.rozipp.core.guiinventory.*;
 import ua.rozipp.core.items.CustomMaterial;
 import ua.rozipp.core.items.CustomMaterialBuilder;
 import ua.rozipp.core.itemscomponents.BlockPlace;
@@ -26,7 +27,7 @@ public class RCore extends JavaPlugin {
     private static Plugin instance;
     public static double minDamage = 0.2; //FIXME Сделать константой в файле civ.yml
     @Getter
-    public static RConfigMultiFiles configManager;
+    public static RConfigMultiFiles configMultiFiles;
 
     public static Plugin getInstance() {
         return instance;
@@ -36,52 +37,54 @@ public class RCore extends JavaPlugin {
     public void onEnable() {
         instance = this;
         this.saveDefaultConfig();
-        LogHelper.setLevel(getConfig().getString("loger_level"));
-        configManager = PluginHelper.getRConfigMultiFiles(this);
-        configManager.loadFiles();
+        LogHelper.setLevel(getConfig().getString("logger_level"));
+        configMultiFiles = PluginHelper.getRConfigMultiFiles(this);
+        configMultiFiles.loadFiles();
 
         PluginHelper.onEnable(this);
 
-        String mainWorldName = this.getConfig().getString("main_world");
-        PluginHelper.dateFormat = new SimpleDateFormat(this.getConfig().getString("simple_date_format", "M/dd/yy h:mm:ss a z"));
+//        String mainWorldName = this.getConfig().getString("main_world");
+//        PluginHelper.dateFormat = new SimpleDateFormat(this.getConfig().getString("simple_date_format", "M/dd/yy h:mm:ss a z"));
 
-        if (mainWorldName != null)
-            PluginHelper.setMainWorld(getServer().getWorld(mainWorldName));
-        if (PluginHelper.getMainWorld() == null)
-            try {
-                PluginHelper.setMainWorld(getServer().getWorlds().get(0));
-            } catch (Exception ignored) { //ONLY_FOR_TEST
-            }
+//        if (mainWorldName != null)
+//            PluginHelper.setMainWorld(getServer().getWorld(mainWorldName));
+//        if (PluginHelper.getMainWorld() == null)
+//            try {
+//                PluginHelper.setMainWorld(getServer().getWorlds().get(0));
+//            } catch (Exception ignored) { //ONLY_FOR_TEST
+//            }
 
 
         PluginHelper.getCustomBlockRegistry();
 
         if (!PluginHelper.hasPlugin("HolographicDisplays"))
-            LogHelper.warning("I can not find find the Holodisply plugin in the plugins. I can not integrate us with holo.");
+            LogHelper.warning("I can not find find the HoloDisplay plugin in the plugins. I can not integrate us with holo.");
 
         try {
-            CustomMaterialBuilder.loadAll(configManager);
+            CustomMaterialBuilder.loadAll(configMultiFiles);
         } catch (InvalidConfiguration e) {
             LogHelper.error(e.getMessage());
         }
 
         try {
-            CustomRecipe.loadAll(this, configManager);
+            CustomRecipe.loadAll(this, configMultiFiles);
         } catch (InvalidConfiguration e) {
             LogHelper.error(e.getMessage());
         }
 
         Key key = new NamespacedKey(this, "m_crafter");
-        CustomMaterial.builder(key, Material.CRAFTING_TABLE, "Персональный крафтер2")
+        CustomMaterial.builder(key, Material.BLAZE_ROD, "Персональный крафтер2")
                 .category("Tools")
                 .lore(List.of("Крафтер тестовый", "Line2"))
                 .addComponent(new ua.rozipp.core.itemscomponents.OpenGui(this, "PersonalCrafter"))
-                .addComponent(new BlockPlace(CustomBlockType.builder(key)
-                        .blockMaterial(Material.CRAFTING_TABLE)
-                        .addComponent(new BlockHologram("Крафтер2", ""))
-                        .addComponent(new ua.rozipp.core.blockscomponents.OpenGui(this, "PersonalCrafter"))
-                        .build()))
-                .build();
+                .build()
+                .addComponent(new BlockPlace(
+                        CustomBlockType.builder(key)
+                                .blockMaterial(Material.CRAFTING_TABLE)
+                                .addComponent(new BlockHologram("Крафтер2", ""))
+                                .addComponent(new ua.rozipp.core.blockscomponents.OpenGui(this, "PersonalCrafter"))
+                                .build()))
+        ;
 
         // ------------------registerAllListener
         ListenerHelper.register(new CustomItemListener(), this);
@@ -89,9 +92,16 @@ public class RCore extends JavaPlugin {
         ArmorListener.blockedMaterials = getConfig().getStringList("blocked");
         ListenerHelper.register(new ArmorListener(), this);
 
-
         // -------------------- commandRegister
         (new RCoreMenu()).register(this);
+
+        PluginHelper.getGuiManager().register("BookGUI", BookGUI.class);
+        PluginHelper.getGuiManager().register("CraftingHelp", CraftingHelp.class);
+        PluginHelper.getGuiManager().register("CraftingHelpRecipe", CraftingHelpRecipe.class);
+        PluginHelper.getGuiManager().register("ItemsSpawn", ItemsSpawn.class);
+        PluginHelper.getGuiManager().register("PersonalCrafter", PersonalCrafter.class);
+        PluginHelper.getGuiManager().register("ResidentPage", ResidentPage.class);
+        PluginHelper.getGuiManager().register("Tutorial", Tutorial.class);
 
     }
 

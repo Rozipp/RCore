@@ -2,6 +2,8 @@ package ua.rozipp.core.blocks;
 
 import lombok.Getter;
 import net.kyori.adventure.key.Key;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
@@ -19,7 +21,7 @@ import java.util.*;
 public class CustomBlockType {
 
     @Getter
-    private final Key id;
+    private final @NotNull Key id;
     @Getter
     private final @NotNull Material blockMaterial;
     @Getter
@@ -59,7 +61,8 @@ public class CustomBlockType {
                 try {
                     addComponent(BlockComponent.builder(this).build(compInfo));
                 } catch (InvalidConfiguration e) {
-                    LogHelper.error("When loading components for the CustomBlock '" + getId() + "', I received the message: '" + e.getMessage() + "'");
+                    LogHelper.error(Component.text("[Bid = " + getId() + "] ", NamedTextColor.DARK_PURPLE)
+                            .append(e.getComponent().color(NamedTextColor.GOLD)));
                 }
     }
 
@@ -109,7 +112,6 @@ public class CustomBlockType {
         private final Key id;
         private Material blockMaterial;
         private final Key itemId;
-        private RConfig rConfig;
         public List<BlockComponent> components = new ArrayList<>();
 
         CustomBlockTypeBuilder(@NotNull Key id, Key itemId) {

@@ -3,6 +3,7 @@ package ua.rozipp.core;
 import lombok.Setter;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.translation.GlobalTranslator;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.jetbrains.annotations.NotNull;
@@ -70,7 +71,7 @@ public class LogHelper {
     }
 
     private static void sendConsole(Component component) {
-        MessageHelper.send(getConsoleSender(), component);
+        getConsoleSender().sendMessage(GlobalTranslator.render(component, LocaleHelper.getServerLocale()));
     }
 
     private static CommandSender getConsoleSender() {

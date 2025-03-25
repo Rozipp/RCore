@@ -41,12 +41,12 @@ public class LocaleHelper {
         return translate(serverLocale, key, null);
     }
 
-    public static String translate(String key, String[] args) {
+    public static String translate(String key, String ... args) {
         return translate(serverLocale, key, args);
     }
 
     public static String translate(Locale locale, String key) {
-        return translate(serverLocale, key, null);
+        return translate(locale, key, null);
     }
 
     public static String translate(Locale locale, String key, String[] args) {

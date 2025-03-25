@@ -13,10 +13,12 @@ public class NoRightClick extends ItemComponent {
 
     public void onInteract(PlayerInteractEvent event) {
         if (event.getAction().equals(Action.RIGHT_CLICK_AIR)) {
+            this.sendMessage(event.getPlayer());
             event.getPlayer().updateInventory();
             event.setCancelled(true);
         } else if (event.getAction().equals(Action.RIGHT_CLICK_BLOCK)) {
             if (event.getClickedBlock() != null && event.getClickedBlock().getType() != Material.CHEST) {
+                this.sendMessage(event.getPlayer());
                 event.getPlayer().updateInventory();
                 event.setCancelled(true);
             }

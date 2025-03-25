@@ -27,11 +27,12 @@ public class RCoreItemsMenu extends CustomMenuCommand {
         withValidator(Validators.mustBeAdmin);
 
         add(new CustomCommand("itemsgui").withDescription(Component.translatable("cmd.rcore.items.itemsgui.description")).withExecutor((sender, label, args) -> {
-            new ItemsSpawn(getPlugin(), null).open(getPlayer(sender));
+            new ItemsSpawn(null).open(getPlayer(sender));
         }));
 
         add(new CustomCommand("recipesgui").withDescription(Component.translatable("cmd.rcore.items.recipesgui.description")).withExecutor((sender, label, args) -> {
-            new CraftingHelp(getPlugin(), null).open(getPlayer(sender));
+            Player player = getPlayer(sender);
+            new CraftingHelp(null).open(player);
         }));
 
         add(new CustomCommand("give").withExecutor((sender, label, args) -> {

@@ -19,7 +19,7 @@ import org.bukkit.event.world.WorldLoadEvent;
 import org.bukkit.util.Vector;
 
 import redempt.redlib.RedLib;
-import ua.rozipp.core.Task;
+import redempt.redlib.Task;
 
 public class LocationUtils {
 	

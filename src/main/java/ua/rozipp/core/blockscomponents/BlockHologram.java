@@ -1,7 +1,5 @@
 package ua.rozipp.core.blockscomponents;
 
-import me.filoghost.holographicdisplays.api.HolographicDisplaysAPI;
-import me.filoghost.holographicdisplays.api.hologram.Hologram;
 import org.bukkit.block.Block;
 import ua.rozipp.core.RCore;
 import ua.rozipp.core.blockdata.events.CustomBlockBuildEvent;
@@ -15,9 +13,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class BlockHologram extends BlockComponent {
-
-    public static final HolographicDisplaysAPI HD_API = HolographicDisplaysAPI.get(RCore.getInstance());
-    private static final Map<Block, Hologram> holograms = new HashMap<>();
 
     private String text1;
     private String text2;
@@ -40,42 +35,42 @@ public class BlockHologram extends BlockComponent {
 
     @Override
     public void onBuild(CustomBlockBuildEvent event) {
-        Block block = event.getBlock();
-        Hologram hologram = holograms.get(block);
-        if (hologram == null) {
-            hologram = HD_API.createHologram(event.getBlock().getLocation().add(0.5, 1.2, 0.5));
-            hologram.getLines().appendText(text1);
-            hologram.getLines().appendText(text2);
-            holograms.put(block, hologram);
-        }
+//        Block block = event.getBlock();
+//        Hologram hologram = holograms.get(block);
+//        if (hologram == null) {
+//            hologram = HD_API.createHologram(event.getBlock().getLocation().add(0.5, 1.2, 0.5));
+//            hologram.getLines().appendText(text1);
+//            hologram.getLines().appendText(text2);
+//            holograms.put(block, hologram);
+//        }
     }
 
     @Override
     public void onLoad(DataBlockLoadEvent event) {
-        Block block = event.getDataBlock().getBlock();
-        Hologram hologram = holograms.get(block);
-        if (hologram == null) {
-            hologram = HD_API.createHologram(event.getDataBlock().getBlock().getLocation().add(0.5, 1.2, 0.5));
-            hologram.getLines().appendText(text1);
-            hologram.getLines().appendText(text2);
-            holograms.put(block, hologram);
-        }
+//        Block block = event.getDataBlock().getBlock();
+//        Hologram hologram = holograms.get(block);
+//        if (hologram == null) {
+//            hologram = HD_API.createHologram(event.getDataBlock().getBlock().getLocation().add(0.5, 1.2, 0.5));
+//            hologram.getLines().appendText(text1);
+//            hologram.getLines().appendText(text2);
+//            holograms.put(block, hologram);
+//        }
     }
 
     @Override
     public void onDestroy(CustomBlockDestroyEvent event) {
-        Block block = event.getDataBlock().getBlock();
-        Hologram hologram = holograms.get(block);
-        if (hologram != null) {
-            hologram.delete();
-            holograms.remove(block);
-        }
+//        Block block = event.getDataBlock().getBlock();
+//        Hologram hologram = holograms.get(block);
+//        if (hologram != null) {
+//            hologram.delete();
+//            holograms.remove(block);
+//        }
     }
 
     @Override
     public void onMove(DataBlockMoveEvent event) {
-        Block block = event.getDataBlock().getBlock();
-        Hologram hologram = holograms.get(block);
-        if (hologram != null) hologram.setPosition(event.getBlock().getLocation().add(0.5, 1.2, 0.5));
+//        Block block = event.getDataBlock().getBlock();
+//        Hologram hologram = holograms.get(block);
+//        if (hologram != null) hologram.setPosition(event.getBlock().getLocation().add(0.5, 1.2, 0.5));
     }
 }

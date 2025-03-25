@@ -1,0 +1,415 @@
+
+
+materials:
+  - id: 'vamparism'
+    material: WITHER_SKELETON_SKULL
+    name: ' &cВампаризм'
+    category: CFExperienceKeeper
+    lore:
+      - ''
+      - ' &7Особенность и применение:'
+      - ' &c- при ударе, есть шанс 20%'
+      - '   &cполучить регенерацию II'
+      - ''
+    glow: false # Включить свечение предмета?
+    components:
+      - trigger: ATTACK
+        chance: 0.2 # Шанс на выдачу эффекта(-ов)
+        target: HIMSELF
+        actions:
+          - name: "AddPotionEffect"
+            effect: 'REGENERATION'
+            effect_duration: 40  # тиков на которые выдается еффєкт
+            effect_amplifier: 3  # уровень еффєкта
+
+  - id: 'snowball'
+    material: SNOWBALL
+    name: ' &bКом снега &8&o(предмет)'
+    category: CFExperienceKeeper
+    lore:
+      - ''
+      - ' &7Особенность и применение:'
+      - ' - при попадении в противника, противник'
+      - '   получает негативные  эффекты.'
+      - ''
+    glow: true # Включить свечение предмета?
+    components:
+      - trigger: RANGE_ATTACK
+        target: VICTIM
+        actions:
+          - name: "AddPotionEffect"
+            effect: 'WEAKNESS'
+            effect_duration: 60  # тиков на которые выдается еффєкт
+            effect_amplifier: 2  # уровень еффєкта
+          - name: "AddPotionEffect"
+            effect: 'BLINDNESS'
+            effect_duration: 100  # тиков на которые выдается еффєкт
+            effect_amplifier: 3  # уровень еффєкта
+          - name: "AddPotionEffect"
+            effect: 'GLOWING'
+            effect_duration: 100  # тиков на которые выдается еффєкт
+            effect_amplifier: 1  # уровень еффєкта
+
+  - id: 'fast_furnace'
+    material: FURNACE
+    # Имя печки должно быть в формате Legacy!!! (https://www.birdflop.com/resources/rgb/)
+    name: ' &x&d&d&2&2&f&bБ&x&d&c&2&6&f&bы&x&d&b&2&a&f&bс&x&d&9&2&e&f&cт&x&d&8&3&2&f&cр&x&d&7&3&6&f&cа&x&d&6&3&a&f&cя &x&d&5&3&e&f&cп&x&d&4&4&2&f&cе&x&d&2&4&6&f&dч&x&d&1&4&a&f&dк&x&d&0&4&e&f&dа &8&o(предмет)'
+    category: CFExperienceKeeper
+    lore:
+      - ''
+      - ' &7Особенность и применение:'
+      - ' &x&d&d&2&2&f&b- печь, которая значительно быстрее'
+      - ''
+    glow: true # Включить свечение предмета?
+    components:
+      - name: BlockPlace
+        blockcomponents:
+          - name: Furnace
+            multiplier: 4.0
+
+  - id: 'jump-three'
+    material: POTION
+    color: '00FF00'
+    name: ' &#93ff9eПрыгучесть III &8&o(предмет)'
+    category: CFExperienceKeeper
+    lore:
+      - ''
+      - ' &7Особенность и применение:'
+      - ' &#93ff9e- Зелье на эффект прыгучесть III на 8 минут'
+      - ''
+    glow: true # Включить свечение предмета?
+    components:
+      - name: "AddPotionEffect"
+        effect: 'JUMP'
+        effect_duration: 9600  # тиков на которые выдается еффєкт
+        effect_amplifier: 3  # уровень еффєкта
+
+  - id: 'window'
+    material: SEA_LANTERN
+    name: ' &#e3fbe1И&#e3fbe1л&#e3fbe1л&#e3fbe1ю&#e3fbe1м&#e3fbe1и&#e3fbe1н&#e3fbe1а&#e3fbe1т&#e3fbe1о&#e3fbe1р'
+    category: CFExperienceKeeper
+    lore:
+      - ''
+      - ' &7Особенность и применение:'
+      - ' &#e3fbe1- при ударе, есть шанс 50% дать игроку,'
+      - ' &#e3fbe1  по которому совершен удар,'
+      - ' &#e3fbe1  эффект свечение на 15 секунд'
+      - ''
+    glow: false # Включить свечение предмета?
+    components:
+      - trigger: 'ATTACK'
+        chance: 0.5 # Шанс на выдачу эффекта(-ов)
+        target: VICTIM
+        actions:
+          - name: "AddPotionEffect"
+            effect: 'GLOWING'
+            effect_duration: 300  # тиков на которые выдается еффєкт
+            effect_amplifier: 1  # уровень еффєкта
+
+  - id: 'tnt_protect'
+    material: TNT
+    name: '&6Взрывоусточивость &8&o(предмет)'
+    category: CFExperienceKeeper
+    lore:
+      - ''
+      - '&7Особенности и применение:'
+      - '&6- когда предмет в инвентаре, вы'
+      - '&6  становитесь взрывоустойчивым от'
+      - '&6  от любого вида Динамита.'
+      - ''
+    glow: false # Включить свечение предмета?
+    components:
+      - name: 'NoPlace'
+        message: 'Взрывоусточивость нельзя поставить!'
+      - name: 'TNTProtect'
+        message: 'Сработан эффект <<Взрывоусточивость>>'
+        value: 1.0 # доля поглощенного урона
+
+  - id: 'gravity_protector'
+    material: FEATHER
+    name: '&6Гравитация &8&o(предмет)'
+    category: CFExperienceKeeper
+    lore:
+      - ''
+      - '§7Особенности и применение:'
+      - '§6- когда вы держите предмет в руке, ваш персонаж'
+      - '§6  не получает урон от падения.'
+      - ''
+    components:
+      - name: 'GravityProtector'
+        message: 'Сработан эффект <<Гравитация>>'
+
+  - id: 'experience_repair'
+    material: EXPERIENCE_BOTTLE
+    name: '&aПузырь опыта &8&o(предмет)'
+    category: CFExperienceKeeper
+    lore:
+      - ''
+      - '§7Особенности и применение:'
+      - '§a- при нажатие ПКМ, полностью ремонтирует'
+      - '§a  надетую на вас броню.'
+      - ''
+    components:
+      - name: 'Repair'
+        message: '&cУспешно' # message
+
+  - id : 'sword_hunter'
+    material: DIAMOND_SWORD
+    name: ' &#ff5c00Охотник'
+    category: CFExperienceKeeper
+    lore:
+      - ''
+      - ' &7Особенность и применение:'
+      - ' &#ff5c00- при убийстве, вы получите'
+      - ' &#ff5c00  50% опыта с противника.'
+      - ''
+    glow: false # Включить свечение предмета?
+    components:
+      - name: 'HunterExperience'
+        percent: 50 # Сколько процентов будет забрано у чушпана (человека которого убили)
+
+  - id: 'clairvoyant'
+    material: HEART_OF_THE_SEA
+    # Имя Ясновидящего должно быть в формате Legacy!!! (https://www.birdflop.com/resources/rgb/)
+    name: ' &x&e&3&f&b&e&1Ясновидящий'
+    category: CFExperienceKeeper
+    lore:
+      - ''
+      - ' &7Особенность и применение:'
+      - ' &#e3fbe1- при ударе, есть шанс 5% дать игроку,'
+      - ' &#e3fbe1  по которому совершен удар,'
+      - ' &#e3fbe1  эффект слепоту на 10 секунд'
+      - ''
+    glow: false # Включить свечение предмета?
+    components:
+      - trigger: 'ATTACK'
+        chance: 0.05 # Шанс на выдачу эффекта(-ов)
+        target: VICTIM
+        actions:
+          - name: "AddPotionEffect"
+            effect: 'BLINDNESS'
+            effect_duration: 200  # тиков на которые выдается еффєкт
+            effect_amplifier: 1  # уровень еффєкта
+
+  - id: 'justice'
+    material: POTION
+    name: '&6Справедливость &8&o(предмет)'
+    category: CFExperienceKeeper
+    lore:
+      - ''
+      - '&7Особенности и применение:'
+      - '&6- когда предмет в инвентаре, вы получаете'
+      - '&6  защиту от дебафов - плавное падение,'
+      - '&6  отравление, иссушение и слабость.'
+      - ''
+    glow: false
+    components:
+      - name: 'EffectsProtector'
+        remove-effects:
+          # Имя эффекта
+          - 'SLOW_FALLING'
+          - 'LEVITATION'
+          - 'WITHER'
+          - 'WEAKNESS'
+          - 'POISON'
+
+  - id : 'ender_infinity'
+    material: ENDER_PEARL
+    name: ' &#ff5c00Эндермен'
+    category: CFExperienceKeeper
+    lore:
+      - ''
+      - ' &7Особенность и применение:'
+      - ' &#ff5c00- когда предмет в инвентаре, с шансом в 50%'
+      - ' &#ff5c00  не потратится эндер-жемчуг, при его броске'
+      - ''
+    glow: false # Включить свечение предмета?
+    components:
+      - name: NoRightClick
+      - name: 'ender_infinity'
+        chance: 0.50 # Шанс чтобы не потерять эндер чемчуг
+
+  - id: 'glow'
+    material: SPLASH_POTION # только зелья
+    color: 'FFFF00'
+    name: '&#fbe411Светлячок &8&o(предмет)'
+    category: CFExperienceKeeper
+    lore:
+      - ''
+      - '&7Особенности и применение:'
+      - '&#fbe411- после разбития, у всех игроков, которых'
+      - '&#fbe411  задело зелье, появляется Свечение на 2 минуты'
+      - ''
+    glow: true
+    components:
+      - trigger: 'RANGE_ATTACK'
+        target: RANGE
+        target_range: 5
+        actions:
+          - name: "AddPotionEffect"
+            effect: 'GLOWING'
+            effect_duration: 2400  # тиков на которые выдается еффєкт
+            effect_amplifier: 1  # уровень еффєкта
+
+  - id: 'milk-potion'
+    material: SPLASH_POTION # только зелья
+    color: 'FFFFFF'
+    name: '&#f1fbdcМолочное зелье &8&o(предмет)'
+    category: CFExperienceKeeper
+    lore:
+      - ''
+      - '&7Особенности и применение:'
+      - '&#f1fbdc- после разбития, у всех игроков, которых'
+      - '&#f1fbdc  задело зелье, пропадают дебафы - плавное падения, '
+      - '&#f1fbdc  медлительность, отравление, иссушение, слабость'
+      - ''
+    glow: true
+    components:
+      - trigger: 'RANGE_ATTACK'
+        target: RANGE
+        target_range: 5
+        actions:
+          - name: "RemovePotionEffect"
+            effect: 'SLOW_FALLING'
+          - name: "RemovePotionEffect"
+            effect: 'LEVITATION'
+          - name: "RemovePotionEffect"
+            effect: 'WITHER'
+          - name: "RemovePotionEffect"
+            effect: 'WEAKNESS'
+          - name: "RemovePotionEffect"
+            effect: 'POISON'
+
+  - id: 'invisibility-two'
+    material: POTION
+    color: 'FFFFFF'
+    name: ' &#e8fbe1Невидимость II &8&o(предмет)'
+    category: CFExperienceKeeper
+    lore:
+      - ''
+      - ' &7Особенность и применение:'
+      - ' &#e8fbe1- Зелье на эффект невидимость II на 20 секунд'
+      - ''
+    glow: true # Включить свечение предмета?
+    components:
+      - trigger: 'RIGHT_CLICK'
+        target: HIMSELF
+        actions:
+          - name: "AddPotionEffect"
+            effect: 'INVISIBILITY'
+            effect_duration: 400  # тиков на которые выдается еффєкт
+            effect_amplifier: 2  # уровень еффєкта
+
+  - id: 'power-three'
+    material: POTION
+    color: 'FF0000'
+    name: ' &#fb0f00У&#f71000л&#f41100у&#f01301ч&#ec1401ш&#e81501е&#e51601н&#e11701н&#dd1801о&#da1a02е &#d61b02з&#d21c02е&#ce1d02л&#cb1e02ь&#c71f02е &#c32103с&#bf2203и&#bc2303л&#b82403ы &8&o(предмет)'
+    category: CFExperienceKeeper
+    lore:
+      - ''
+      - ' &7Особенность и применение:'
+      - ' &#e8fbe1- Зелье на эффект Силы III на 3 минуты'
+      - ''
+    glow: true # Включить свечение предмета?
+    hide-effects: true # Скрывать эффекты?
+    components:
+      - trigger: 'RIGHT_CLICK'
+        target: HIMSELF
+        actions:
+          - name: "AddPotionEffect"
+            effect: 'INCREASE_DAMAGE'
+            effect_duration: 3600  # тиков на которые выдается еффєкт
+            effect_amplifier: 3  # уровень еффєкта
+
+  - id: 'speed-three'
+    material: POTION
+    color: '0000FF'
+    name: ' &#0ec2fbУ&#11c3fbл&#13c5fbу&#16c6fcч&#18c7fcш&#1bc8fcе&#1ecafcн&#20cbfcн&#23ccfcо&#25cdfdе &#28cffdз&#2bd0fdе&#2dd1fdл&#30d3fdь&#32d4feе &#35d5feс&#37d6feк&#3ad8feо&#3dd9feр&#3fdafeо&#42dbffс&#44ddffт&#47deffи &8&o(предмет)'
+    category: CFExperienceKeeper
+    lore:
+      - ''
+      - ' &7Особенность и применение:'
+      - ' &#e8fbe1- Зелье на эффект Скорости III на 3 минуты'
+      - ''
+    glow: true # Включить свечение предмета?
+    hide-effects: true # Скрывать эффекты?
+    components:
+      - trigger: 'RIGHT_CLICK'
+        target: HIMSELF
+        actions:
+          - name: "AddPotionEffect"
+            effect: 'SPEED'
+            effect_duration: 3600  # тиков на которые выдается еффєкт
+            effect_amplifier: 3  # уровень еффєкта
+
+#  - id: 'jake_head'
+#    material: CARVED_PUMPKIN
+#    name: ' &#fbc400С&#fbc800в&#fbcc00е&#facf00т&#fad301и&#fad701л&#fadb01ь&#fadf01н&#f9e201и&#f9e601к &#f9ea01Д&#f9ee01ж&#f9f202е&#f8f502й&#f8f902к&#f8fd02а'
+#    category: CFExperienceKeeper
+#    lore:
+#      - ''
+#      - ' &7Особенность и применение:'
+#      - ' &#f8fd02- при нажатие ПКМ, всем игрокам в радиусе'
+#      - ' &#f8fd02  15 блоков, на которых отсутствует'
+#      - ' &#f8fd02  шлем, надевается Светильник Джека (тыква),'
+#      - ' &#f8fd02  который нельзя снять, на протяжении 15 секунд.'
+#      - ''
+#    glow: false # Включить свечение предмета?
+#    components:
+#      - trigger: 'RIGHT_CLICK'
+#        target: RANGE
+#        target_range: 15
+#        actions:
+#          - name: "JakeHead"
+#            timer: 15 # Время в секундах
+#            message: 'Вы не можете снять тыкву с головы!'
+#      - name: WoldBlackList
+#        worlds: ['spawn'] # Миры в которых нельзя будет юзать взрувную штучку
+#        message: 'В этом мире нельзя использовать Джейка!'
+
+  - id: 'explosive'
+    material: FIRE_CHARGE
+    name: ' &#ff0000Взрывная штучка &8&o(предмет)'
+    category: CFExperienceKeeper
+    lore:
+      - ''
+      - ' &7Особенность и применение:'
+      - ' &#ff4444- при нажатие ПКМ, вызывает взрыв, с силой'
+      - ' &#ff4444  способной убить игрока без брони, на расстоянии'
+      - ' &#ff4444  3 блоков от точки активации;'
+      - ' &#ff4444- урон наносится, в том числе игроку, который'
+      - ' &#ff4444  активировал Взрывную Штучку.'
+      - ''
+    glow: false # Включить свечение предмета?
+    components:
+      - trigger: 'RIGHT_CLICK'
+        target: RANGE
+        particles: [EXPLOSION_NORMAL] # Партиклы которые вызываются кто-то юзают взрывную штучку
+        target_range: 15
+        actions:
+          - name: "Explosion"
+            damage_without_armor: 8 # Сколько урона будет нанесено игроку без брони
+            damage_with_armor: 3 # Урон игрокам с броней
+      - name: WoldBlackList
+        worlds: ['spawn'] # Миры в которых нельзя будет юзать взрувную штучку
+        message: 'В этом мире нельзя использовать взрывную штучку!'
+
+
+  - id: 'anv'
+    material: ANVIL
+    name: '&#ff02b8Нерушимая наковальня &8&o(предмет)'
+    category: CFExperienceKeeper
+    lore:
+      - ''
+      - '&7Особенности и применение:'
+      - '&#ff02b8- наковалья, которая не разрушается'
+      - '&#ff02b8  от использования;'
+      - '&#ff02b8- если её сломать, взорвать, то выпадет'
+      - '&#ff02b8  обратно "Нерушимая Наковальня"'
+      - ''
+    glow: true
+    components:
+      - name : BlockPlace
+        blockcomponents:
+          - name: NoDurability
+

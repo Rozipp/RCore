@@ -21,17 +21,18 @@ public abstract class BlockComponent {
     private final static Map<String, Class<? extends BlockComponent>> components = new HashMap<>();
 
     static {
-        register(TNTExplode.class);
-        register(TNTFrozen.class);
-        register(OpenGui.class);
+        register("TNTExplode", TNTExplode.class);
+        register("TNTFrozen", TNTFrozen.class);
+        register("OpenGui", OpenGui.class);
+        register("Furnace", Furnace.class);
     }
 
     public static Class<? extends BlockComponent> getBlockComponentClass(String name) {
         return components.get(name);
     }
 
-    public static void register(Class<? extends BlockComponent> aClass) {
-        components.put(aClass.getSimpleName(), aClass);
+    public static void register(String name, Class<? extends BlockComponent> aClass) {
+        components.put(name, aClass);
     }
 
     public static BlockComponentBuilder builder(CustomBlockType type) {
@@ -106,10 +107,11 @@ public abstract class BlockComponent {
 
         public BlockComponent build(RConfig rConfig) throws InvalidConfiguration {
             try {
-                String className = rConfig.getString("name", null, "[Mid = " + type.getId() + "] component's name not found");
+                String className = rConfig.getString("name", null, "Component's name not found");
                 if (className.isEmpty())
-                    throw new InvalidConfiguration("[Mid = " + type.getId() + "] component's name is empty");
+                    throw new InvalidConfiguration("Component's name is empty");
                 Class<? extends BlockComponent> cls = components.get(className);
+                if (cls == null) throw new InvalidConfiguration("Component's \"" + className + "\" class not found");
                 BlockComponent blockComponent = cls.getConstructor().newInstance();
                 blockComponent.type = type;
                 blockComponent.load(rConfig);

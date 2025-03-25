@@ -24,7 +24,7 @@ public class NBT extends ItemComponent {
     }
 
     @Override
-    public void onSpawnItem(ItemStackBuilder builder) {
+    public void onBuildItemStack(ItemStackBuilder builder) {
         builder.setColor(Color.fromRGB(Integer.decode("0x" + value)));
 
     }

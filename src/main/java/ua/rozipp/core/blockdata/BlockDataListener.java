@@ -8,7 +8,6 @@ import org.bukkit.event.block.*;
 import org.bukkit.event.entity.EntityChangeBlockEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import ua.rozipp.core.PluginHelper;
-import ua.rozipp.core.Task;
 import ua.rozipp.core.blockdata.events.*;
 import ua.rozipp.core.blockdata.events.DataBlockDestroyEvent.DestroyCause;
 import ua.rozipp.core.blocks.CustomBlockRegistry;
@@ -103,7 +102,7 @@ public class BlockDataListener implements Listener {
 
 		toMoveDB.forEach(manager::remove);
 
-		Task.syncDelayed(() -> {
+		PluginHelper.sync().runLater(() -> {
 			movedDB.forEach((block, dbOld) -> {
 				DataBlock dbNew = manager.getDataBlock(block, true);
 				if (dbNew != null) {

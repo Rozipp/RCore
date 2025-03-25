@@ -37,7 +37,7 @@ public class CustomBlockRegistry implements Listener {
 	public static final String TAGNAME = "RBID";
 	private final BlockDataManager manager;
 	private final Map<Key, CustomBlockType> types = new HashMap<>();
-	private final Map<Key, CustomBlockType> byItemName = new HashMap<>();
+	private final Map<Key, CustomBlockType> byItem = new HashMap<>();
 
 	/**
 	 * Construct a CustomBlockRegistry, passing a plugin. Use this constructor if you plan to use
@@ -109,8 +109,8 @@ public class CustomBlockRegistry implements Listener {
 	 * @param type The CBlockT to register
 	 */
 	public void register(CustomBlockType type) {
-		byItemName.put(type.getId(), type);
-		types.put(type.getItemId(), type);
+		byItem.put(type.getItemId(), type);
+		types.put(type.getId(), type);
 	}
 
 	public void unregisterAll(Plugin plugin) {
@@ -121,7 +121,7 @@ public class CustomBlockRegistry implements Listener {
 		}
 		for (CustomBlockType customBlockType : customBlockTypes) {
 			types.remove(customBlockType.getId());
-			byItemName.remove(customBlockType.getItemId());
+			byItem.remove(customBlockType.getItemId());
 		}
 		LogHelper.fine("Unregistered " + customBlockTypes.size() + " CustomBlock");
 	}
@@ -146,7 +146,7 @@ public class CustomBlockRegistry implements Listener {
 
 	@EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
 	public void onBlockPlaceEvent(BlockPlaceEvent e) {
-		CustomBlockType type = byItemName.get(ItemHelper.getKey(e.getItemInHand()));
+		CustomBlockType type = byItem.get(ItemHelper.getKey(e.getItemInHand()));
 		if (type == null) return;
 
 		CustomBlockCanBuildEvent place = new CustomBlockCanBuildEvent(e.getBlock(), e.getItemInHand(), type, e.getPlayer());
@@ -155,10 +155,6 @@ public class CustomBlockRegistry implements Listener {
 			e.setCancelled(true);
 			return;
 		}
-
-		//TODO Благодаря этому фиксу не будет на месте одного блока сразу две DataBlock, но блок удаляется неправильно
-		DataBlock db = manager.getDataBlock(e.getBlock());
-		if (db != null) manager.remove(db);
 
 		createCustomBlock(e.getBlockPlaced(), e.getBlockAgainst().getFace(e.getBlockPlaced()), type, e.getItemInHand(), e.getPlayer());
 	}

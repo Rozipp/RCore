@@ -26,7 +26,7 @@ public class DurabilityOnDeath extends ItemComponent {
     }
 
     @Override
-    public void onSpawnItem(ItemStackBuilder builder) {
+    public void onBuildItemStack(ItemStackBuilder builder) {
 //		attrs.addLore(CivColor.Blue+""+this.getDouble("value")+" Durability");
     }
 

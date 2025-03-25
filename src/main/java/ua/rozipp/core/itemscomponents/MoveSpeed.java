@@ -25,7 +25,7 @@ public class MoveSpeed extends ItemComponent {
     }
 
     @Override
-    public void onSpawnItem(ItemStackBuilder builder) {
+    public void onBuildItemStack(ItemStackBuilder builder) {
         builder.addAttribute(Attribute.GENERIC_MOVEMENT_SPEED,
                 AttributeModifierBuilder.newBuilder().name("Speed").
                         amount(speedValue).

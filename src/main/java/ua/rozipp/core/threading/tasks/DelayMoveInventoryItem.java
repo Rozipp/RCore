@@ -4,8 +4,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.Cancellable;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
-import ua.rozipp.core.Task;
-import ua.rozipp.core.RCore;
+import ua.rozipp.core.PluginHelper;
 
 /**
  * ищет инвентаре предмет того же типа что stack и меняет его в инвентаре игрока
@@ -38,11 +37,11 @@ public class DelayMoveInventoryItem implements Runnable {
     }
 
     public static void beginTaskSwap(Cancellable event, Player player, ItemStack stack, int slot) {
-        Task.syncDelayed(RCore.getInstance(), new DelayMoveInventoryItem(event, player, player.getInventory(), stack, slot, Action.SWAP), 1);
+        PluginHelper.sync().runLater(new DelayMoveInventoryItem(event, player, player.getInventory(), stack, slot, Action.SWAP), 1);
     }
 
     public static void beginTaskRespawn(Cancellable event, Player player, Inventory inventory, ItemStack stack, int slot) {
-        Task.syncDelayed(RCore.getInstance(), new DelayMoveInventoryItem(event, player, inventory, stack, slot, Action.RESPAWN), 1);
+        PluginHelper.sync().runLater(new DelayMoveInventoryItem(event, player, inventory, stack, slot, Action.RESPAWN), 1);
     }
 
     @Override

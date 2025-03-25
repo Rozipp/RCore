@@ -4,10 +4,10 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.plugin.Plugin;
 import ua.rozipp.core.LogHelper;
+import ua.rozipp.core.PluginHelper;
 import ua.rozipp.core.config.RConfig;
-import ua.rozipp.core.exception.GuiException;
+import ua.rozipp.core.exception.ComponentException;
 import ua.rozipp.core.exception.InvalidConfiguration;
-import ua.rozipp.core.guiinventory.PersonalCrafter;
 
 public class OpenGui extends BlockComponent {
 
@@ -33,13 +33,11 @@ public class OpenGui extends BlockComponent {
     @Override
     public void onInteract(PlayerInteractEvent event) {
         if (event.getAction().equals(Action.RIGHT_CLICK_BLOCK)) {
-            if (gui_name.equals("PersonalCrafter")) {
-                try {
-                    new PersonalCrafter(plugin, event.getPlayer()).open(event.getPlayer());
-                    event.setCancelled(true);
-                } catch (GuiException e) {
-                    LogHelper.error(e.getComponent());
-                }
+            try {
+                PluginHelper.getGuiManager().getGui(gui_name, null).open(event.getPlayer());
+                event.setCancelled(true);
+            } catch (ComponentException e) {
+                LogHelper.error(e.getComponent());
             }
         }
     }

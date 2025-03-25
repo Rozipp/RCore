@@ -14,7 +14,7 @@ import java.util.concurrent.CompletableFuture;
 
 class PDCBackend implements BlockDataBackend {
 	
-	private NamespacedKey key;
+	private final NamespacedKey key;
 	
 	public PDCBackend(Plugin plugin) {
 		key = new NamespacedKey(plugin, "blockData");
@@ -22,20 +22,20 @@ class PDCBackend implements BlockDataBackend {
 	
 	@Override
 	public CompletableFuture<String> load(ChunkPosition pos) {
-		PersistentDataContainer pdc = pos.getWorld().getChunkAt(pos.getX(), pos.getZ()).getPersistentDataContainer();
+		PersistentDataContainer pdc = pos.getChunk().getPersistentDataContainer();
 		return CompletableFuture.completedFuture(pdc.get(key, PersistentDataType.STRING));
 	}
 	
 	@Override
 	public CompletableFuture<Void> save(ChunkPosition pos, String data) {
-		PersistentDataContainer pdc = pos.getWorld().getChunkAt(pos.getX(), pos.getZ()).getPersistentDataContainer();
+		PersistentDataContainer pdc = pos.getChunk().getPersistentDataContainer();
 		pdc.set(key, PersistentDataType.STRING, data);
 		return CompletableFuture.completedFuture(null);
 	}
 	
 	@Override
 	public CompletableFuture<Void> remove(ChunkPosition pos) {
-		PersistentDataContainer pdc = pos.getWorld().getChunkAt(pos.getX(), pos.getZ()).getPersistentDataContainer();
+		PersistentDataContainer pdc = pos.getChunk().getPersistentDataContainer();
 		pdc.remove(key);
 		return CompletableFuture.completedFuture(null);
 	}

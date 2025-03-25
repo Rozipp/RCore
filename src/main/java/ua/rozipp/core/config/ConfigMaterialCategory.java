@@ -1,7 +1,6 @@
 package ua.rozipp.core.config;
 
 import net.kyori.adventure.key.Key;
-import ua.rozipp.core.LogHelper;
 import ua.rozipp.core.items.CustomMaterial;
 
 import java.util.Collection;
@@ -10,12 +9,11 @@ import java.util.TreeMap;
 
 public class ConfigMaterialCategory {
 
-	private static TreeMap<String, ConfigMaterialCategory> categories = new TreeMap<>();
+	private static final TreeMap<String, ConfigMaterialCategory> categories = new TreeMap<>();
 
 	public String id;
 	public String title;
 	public HashMap<Key, CustomMaterial> materials = new HashMap<>();
-	public int craftableCount = 0;
 
 	public static void addMaterial(CustomMaterial mat) {
 		if (mat.getCategory() == null || mat.getCategory().isEmpty()) return;
@@ -27,7 +25,6 @@ public class ConfigMaterialCategory {
 		}
 
 		cat.materials.put(mat.getMid(), mat);
-		if (mat.isCraftable()) cat.craftableCount++;
 		categories.put(cat.id, cat);
 	}
 

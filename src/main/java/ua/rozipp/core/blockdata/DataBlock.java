@@ -1,14 +1,8 @@
 package ua.rozipp.core.blockdata;
 
-import lombok.Getter;
-import org.bukkit.Location;
 import org.bukkit.block.Block;
-import org.bukkit.entity.ArmorStand;
-import org.bukkit.entity.EntityType;
 import redempt.redlib.json.JSONList;
 import redempt.redlib.json.JSONMap;
-import redempt.redlib.json.JSONParser;
-import ua.rozipp.core.LogHelper;
 
 import java.util.Map;
 import java.util.Set;
@@ -23,44 +17,12 @@ public class DataBlock {
 	protected JSONMap data;
 	private final BlockDataManager manager;
 	private final BlockPosition blockPosition;
-	@Getter
-	private final ArmorStand entity;
 	private boolean delete = false;
 
 	DataBlock(JSONMap data, BlockPosition blockPosition, BlockDataManager manager) {
 		this.data = data;
 		this.blockPosition = blockPosition;
 		this.manager = manager;
-		ArmorStand armorStand = (ArmorStand) blockPosition.getWorld().spawnEntity(
-				new Location(blockPosition.getWorld(),
-						blockPosition.getX() + 0.5,
-						blockPosition.getY(),
-						blockPosition.getZ() + 0.5),
-				EntityType.ARMOR_STAND);
-		armorStand.setSmall(true);
-		armorStand.setCollidable(false);
-		armorStand.setVisible(true);
-		armorStand.setGravity(false);
-		armorStand.setCustomNameVisible(true);
-		this.entity = armorStand;
-		save();
-	}
-
-	private DataBlock(ArmorStand entity, BlockDataManager manager) {
-		this.manager = manager;
-		this.entity = entity;
-		data = JSONParser.parseMap(entity.getCustomName());
-		Location location = entity.getLocation();
-		blockPosition = new BlockPosition(location.getWorld().getName(), location.getBlockX(), location.getBlockY(), location.getBlockZ());
-	}
-
-	public static DataBlock loadFromArmorStand(ArmorStand entity, BlockDataManager manager) {
-		if (entity.getType().equals(EntityType.ARMOR_STAND))
-			try {
-				return new DataBlock(entity, manager);
-			} catch (Exception ignored) {
-			}
-		return null;
 	}
 
 	/**
@@ -185,7 +147,6 @@ public class DataBlock {
 			data.remove(key);
 		else
 			data.put(key, value);
-		save();
 	}
 	
 	/**
@@ -210,18 +171,12 @@ public class DataBlock {
 		return data.keySet();
 	}
 
-	public void save() {
-		if (entity != null) entity.setCustomName(JSONParser.toJSONString(data));
-	}
-
 	public void remove() {
-		if (entity != null) entity.remove();
 		this.delete = true;
 	}
 
 	public void setData(JSONMap data) {
 		this.data = data;
-		save();
 	}
 
 	public boolean isDelete() {

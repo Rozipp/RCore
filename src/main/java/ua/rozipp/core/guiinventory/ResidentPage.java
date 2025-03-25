@@ -1,23 +1,19 @@
 package ua.rozipp.core.guiinventory;
 
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
-import org.bukkit.Bukkit;
-import org.bukkit.Material;
-import org.bukkit.entity.Player;
-import org.bukkit.plugin.Plugin;
 import ua.rozipp.core.PluginHelper;
-import ua.rozipp.core.exception.GuiException;
-import ua.rozipp.core.gui.InventoryGUI;
-import ua.rozipp.core.items.ItemHelper;
+import ua.rozipp.core.gui.RGuiImp;
 
 import java.text.SimpleDateFormat;
 
-public class ResidentPage extends InventoryGUI {
+public class ResidentPage extends RGuiImp {
 
-	public ResidentPage(Plugin plugin, Player player, String arg) throws GuiException {
-		super(plugin, Bukkit.createInventory(null, 6 * 9,Component.translatable("bookReborn_resInfoHeading")));
+	public ResidentPage(Object arg) {
+		super(6, Component.translatable("bookReborn_resInfoHeading"));
+	}
 
+	@Override
+	public void onFirstDraw() {
 		SimpleDateFormat sdf = PluginHelper.dateFormat;
 
 		/*this.addGuiItem(0, GuiItemBuilder.guiItemBuilder(ItemHelper.createItemStack(Material.SKELETON_SKULL,1))//
@@ -31,5 +27,4 @@ public class ResidentPage extends InventoryGUI {
 //						CivColor.Red + CivSettings.localize.translate("Camp") + getResident().getCampName()
 				.build());*/
 	}
-
 }

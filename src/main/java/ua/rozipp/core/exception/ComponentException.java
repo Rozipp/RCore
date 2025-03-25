@@ -3,7 +3,7 @@ package ua.rozipp.core.exception;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.jetbrains.annotations.NotNull;
-import ua.rozipp.core.util.ComponentUtils;
+import ua.rozipp.core.util.TextUtils;
 
 import java.io.Serial;
 
@@ -16,7 +16,7 @@ public class ComponentException extends Exception {
 
     public ComponentException(@NotNull String message) {
         super(message);
-        this.component = Component.text(message, NamedTextColor.RED);
+        this.component = Component.text(message);
     }
 
     public ComponentException(@NotNull ComponentException componentException) {
@@ -25,8 +25,8 @@ public class ComponentException extends Exception {
     }
 
     public ComponentException(@NotNull Component component) {
-        super(ComponentUtils.componentToString(component));
-        this.component = component.color(NamedTextColor.RED);
+        super(TextUtils.componentToString(component));
+        this.component = component;
     }
 
     public Component getComponent() {
@@ -35,7 +35,7 @@ public class ComponentException extends Exception {
 
     @Override
     public String getMessage() {
-        return ComponentUtils.componentToString(getComponent());
+        return TextUtils.componentToString(getComponent());
     }
 
 }

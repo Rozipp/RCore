@@ -1,5 +1,6 @@
 package ua.rozipp.core.config;
 
+import com.j256.ormlite.stmt.query.In;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.bukkit.configuration.serialization.ConfigurationSerialization;
@@ -132,12 +133,18 @@ public abstract class RConfig {
 
     public double getDouble(@NotNull String path) {
         Object o = get(path);
-        return (o != null) ? (Double) o : 0;
+        if (o == null) return 0;
+        if (o instanceof Double) return (double) o;
+        if (o instanceof Integer) return (Integer) o;
+        return 0;
     }
 
     public double getDouble(@NotNull String path, double def) {
         Object o = get(path);
-        return (o != null) ? (Double) o : def;
+        if (o == null) return def;
+        if (o instanceof Double) return (double) o;
+        if (o instanceof Integer) return (Integer) o;
+        return def;
     }
 
     public double getDouble(@NotNull String path, @Nullable Double def, @Nullable String message) throws InvalidConfiguration {

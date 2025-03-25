@@ -4,9 +4,7 @@ import net.kyori.adventure.text.Component;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.inventory.ItemStack;
-import ua.rozipp.core.Task;
 import ua.rozipp.core.PluginHelper;
-import ua.rozipp.core.RCore;
 
 public class CriticalEnchantment extends CustomEnchantment {
 
@@ -24,9 +22,8 @@ public class CriticalEnchantment extends CustomEnchantment {
 
 	public static void run(EntityDamageByEntityEvent event, ItemStack weapon) {
 		if (randomCriticalAttack(weapon)){
-			if (event.getEntity() instanceof LivingEntity) {
-				LivingEntity entity = (LivingEntity) event.getEntity();
-				Task.syncDelayed(RCore.getInstance(), () -> entity.damage(event.getDamage(), event.getDamager()), 1);
+			if (event.getEntity() instanceof LivingEntity entity) {
+				PluginHelper.sync().runLater(() -> entity.damage(event.getDamage(), event.getDamager()), 1);
 			}}
 	}
 }

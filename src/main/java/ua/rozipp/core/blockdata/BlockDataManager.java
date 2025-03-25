@@ -38,21 +38,21 @@ public abstract class BlockDataManager {
      * @param events   Whether to listen for events to automatically move and remove DataBlocks in response to their owning blocks being moved and removed
      * @return The created BlockDataManager
      */
-    public static BlockDataManager createPDC(Plugin plugin, boolean autoLoad, boolean events) {
-//        BlockDataBackend backend = BlockDataBackend.pdc(plugin);
-        return new BlockDataManagerEntity(plugin, autoLoad, events);
+    public static BlockDataManager createPDC(Plugin plugin, boolean autoLoad) {
+        BlockDataBackend backend = BlockDataBackend.pdc(plugin);
+        return new BlockDataManagerChunk(plugin, backend, autoLoad);
     }
 
-    protected BlockDataManager(Plugin plugin, BlockDataBackend backend, boolean autoLoad, boolean events) {
+    protected BlockDataManager(Plugin plugin, BlockDataBackend backend, boolean autoLoad) {
         this.backend = backend;
         this.plugin = plugin;
         new EventListener<>(plugin,
                 ChunkUnloadEvent.class,
                 e -> unwrap(unloadChunkAsync(new ChunkPosition(e.getChunk()))));
         if (autoLoad)
-            new EventListener<>(plugin, ChunkLoadEvent.class, e -> {
-                unwrap(loadChunkAsync(new ChunkPosition(e.getChunk())));
-            });
+            new EventListener<>(plugin,
+                    ChunkLoadEvent.class,
+                    e -> unwrap(loadChunkAsync(new ChunkPosition(e.getChunk()))));
     }
 
     /**

@@ -1,8 +1,9 @@
 package ua.rozipp.core.listener;
 
-import org.bukkit.Bukkit;
+import org.bukkit.GameRule;
 import org.bukkit.Material;
-import org.bukkit.entity.Arrow;
+import org.bukkit.NamespacedKey;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.Event.Result;
@@ -14,14 +15,15 @@ import org.bukkit.event.entity.*;
 import org.bukkit.event.inventory.*;
 import org.bukkit.event.player.*;
 import org.bukkit.inventory.*;
-import ua.rozipp.core.Task;
+import org.bukkit.persistence.PersistentDataType;
+import ua.rozipp.core.PluginHelper;
 import ua.rozipp.core.RCore;
 import ua.rozipp.core.enchantment.CustomEnchantment;
 import ua.rozipp.core.enchantment.Enchantments;
-import ua.rozipp.core.gui.GuiHelper;
 import ua.rozipp.core.items.CustomMaterial;
 
 import java.util.HashMap;
+import java.util.Objects;
 
 public class CustomItemListener implements Listener {
 
@@ -36,8 +38,9 @@ public class CustomItemListener implements Listener {
     @EventHandler(priority = EventPriority.LOW)
     public void onInteractEntity(PlayerInteractEntityEvent event) {
         if (event.isCancelled()) return;
-        CustomMaterial material = CustomMaterial.getCustomMaterial(event.getPlayer().getInventory().getItemInMainHand());
-        if (material != null) material.onInteractEntity(event);
+        ItemStack stack = (event.getHand() == EquipmentSlot.OFF_HAND) ? event.getPlayer().getInventory().getItemInOffHand() : event.getPlayer().getInventory().getItemInMainHand();
+        CustomMaterial cmat = CustomMaterial.getCustomMaterial(stack);
+        if (cmat != null) cmat.onInteractEntity(event);
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
@@ -81,129 +84,69 @@ public class CustomItemListener implements Listener {
         }
     }
 
-    @EventHandler(priority = EventPriority.LOW)
-    public void onEntityShootBowEvent(EntityShootBowEvent event) {
-//        if (event.getEntity() instanceof Player) {
-//            Player player = (Player) event.getEntity();
-//            Arrow arrow = (Arrow) event.getProjectile();
-//
-//            int slot = ArrowComponent.foundShootingArrow(player.getInventory());
-//            if (slot == -1) {
-////				event.setCancelled(true);
-////				event.setProjectile(null);
-//            } else {
-//                Location loc = event.getEntity().getEyeLocation();
-//                Vector velocity = arrow.getVelocity();
-//                float speed = (float) velocity.length();
-//                Vector dir = event.getEntity().getEyeLocation().getDirection();
-//
-//                ItemStack stack = player.getInventory().getItem(slot);
-//                FixedMetadataValue metadata = ArrowComponent.getMetadata(stack);
-//                if (metadata != null) {
-//                    TippedArrow tarrow = loc.getWorld().spawnArrow(loc.add(dir.multiply(2)), dir, speed, 0.0f, TippedArrow.class);
-//                    if (metadata.equals(ArrowComponent.arrow_fire1)) tarrow.setFireTicks(2000);
-//                    if (metadata.equals(ArrowComponent.arrow_fire2)) tarrow.setFireTicks(4000);
-//                    if (metadata.equals(ArrowComponent.arrow_fire3)) tarrow.setFireTicks(6000);
-//                    if (metadata.equals(ArrowComponent.arrow_knockback1)) tarrow.setKnockbackStrength(1);
-//                    if (metadata.equals(ArrowComponent.arrow_knockback2)) tarrow.setKnockbackStrength(2);
-//                    if (metadata.equals(ArrowComponent.arrow_knockback3)) tarrow.setKnockbackStrength(3);
-//                    tarrow.setMetadata("civ_arrow_effect", metadata);
-//                    arrow = tarrow;
-//                } else {
-//                    arrow = loc.getWorld().spawnArrow(loc.add(dir.multiply(2)), dir, speed, 0.0f);
-//                }
-//                arrow.setShooter(event.getEntity());
-//                arrow.setPickupStatus(AbstractArrow.PickupStatus.DISALLOWED);
-//                event.setProjectile(arrow);
-//            }
-//        }
+    private static final NamespacedKey PROJECTILE_CMAT_KEY = new NamespacedKey(RCore.getInstance(), "ProjectileCMat");
+
+    @EventHandler
+    public void onProjectileLaunch(ProjectileLaunchEvent event) {
+        if (event.getEntity().getShooter() instanceof LivingEntity shooter) {
+            ItemStack inHand = Objects.requireNonNull(shooter.getEquipment()).getItemInMainHand();
+            CustomMaterial cmat = CustomMaterial.getCustomMaterial(inHand);
+            if (cmat != null) {
+                event.getEntity().getPersistentDataContainer().set(PROJECTILE_CMAT_KEY,
+                        PersistentDataType.STRING,
+                        cmat.getMid().asString());
+            }
+        }
+    }
+
+    @EventHandler
+    public void onProjectileHit(ProjectileHitEvent event) {
+        String mid = event.getEntity().getPersistentDataContainer().get(PROJECTILE_CMAT_KEY, PersistentDataType.STRING);
+        CustomMaterial cmat = CustomMaterial.getCustomMaterial(mid);
+        if (cmat != null) {
+            cmat.onProjectileHit(event);
+        }
     }
 
     @EventHandler(priority = EventPriority.LOW)
     public void onPlayerDefenseAndAttack(EntityDamageByEntityEvent event) {
         if (event.isCancelled()) return;
-        Player attacker;
-        if (event.getDamager() instanceof Player) {
-            attacker = (Player) event.getDamager();
-        } else if (event.getDamager() instanceof Arrow) {
-            Arrow arrow = (Arrow) event.getDamager();
-            if (arrow.getShooter() instanceof Player) attacker = (Player) arrow.getShooter();
-        }
 
         Double baseDamage = event.getDamage();
 
-       /* Player defendingPlayer = null;
+        Player defendingPlayer = null;
         if (event.getEntity() instanceof Player) defendingPlayer = (Player) event.getEntity();
 
-        if (event.getDamager() instanceof Arrow) {
-            Arrow arrow = (Arrow) event.getDamager();
-
-            if (event.getEntity() instanceof LivingEntity) {
-                if (arrow.hasMetadata("civ_arrow_effect")) {
-                    for (MetadataValue dd : arrow.getMetadata("civ_arrow_effect")) {
-                        // if (dd.equals(ArrowComponent.arrow_fire)) defendingPlayer.set);
-                        PotionEffect pe = null;
-//                        if (dd.equals(ArrowComponent.arrow_frost1)) pe = new PotionEffect(PotionEffectType.SLOW, 40, 1);
-//                        if (dd.equals(ArrowComponent.arrow_frost2)) pe = new PotionEffect(PotionEffectType.SLOW, 80, 1);
-//                        if (dd.equals(ArrowComponent.arrow_frost3))
-//                            pe = new PotionEffect(PotionEffectType.SLOW, 120, 1);
-//                        if (dd.equals(ArrowComponent.arrow_poison1))
-//                            pe = new PotionEffect(PotionEffectType.POISON, 40, 1);
-//                        if (dd.equals(ArrowComponent.arrow_poison2))
-//                            pe = new PotionEffect(PotionEffectType.POISON, 80, 1);
-//                        if (dd.equals(ArrowComponent.arrow_poison3))
-//                            pe = new PotionEffect(PotionEffectType.POISON, 120, 1);
-
-                        if (pe != null) ((LivingEntity) event.getEntity()).addPotionEffect(pe);
-                    }
-                }
-            }
-
-            if (arrow.getShooter() instanceof Player) {
-                attacker = (Player) arrow.getShooter();
-                ItemStack inHand = attacker.getEquipment().getItemInMainHand();
-                if (!CustomMaterial.getMid(inHand).asString().contains("_bow"))
-                    inHand = attacker.getEquipment().getItemInOffHand();
-
-                CustomMaterial cMat = CustomMaterial.getCustomMaterial(inHand);
-                if (cMat != null) cMat.onRangedAttack(event, inHand);
-            }
-        }
-
         if (event.getDamager() instanceof Player) {
-            attacker = (Player) event.getDamager();
-
-            ItemStack inHand = attacker.getInventory().getItemInMainHand();
+            ItemStack inHand = ((Player) event.getDamager()).getInventory().getItemInMainHand();
             CustomMaterial cMat = CustomMaterial.getCustomMaterial(inHand);
 
             if (cMat != null)
                 cMat.onAttack(event, inHand);
-            else
-                event.setDamage(RCore.minDamage); *//* Non-civcraft items only do 0.5 damage. *//*
+//            else
+//                event.setDamage(0.5);  //Non-civcraft items only do 0.5 damage.
 
-            if (Enchantments.hasEnchantment(inHand, CustomEnchantment.Critical))
-                CriticalEnchantment.run(event, inHand);
+//            if (Enchantments.hasEnchantment(inHand, CustomEnchantment.Critical))
+//                CriticalEnchantment.run(event, inHand);
         }
 
         if (defendingPlayer != null) {
-            *//* Search equipt items for defense event. *//*
-            for (ItemStack stack : defendingPlayer.getEquipment().getArmorContents()) {
+            /* Search equipt items for defense event. */
+            for (ItemStack stack : Objects.requireNonNull(defendingPlayer.getEquipment()).getArmorContents()) {
                 CustomMaterial cmat = CustomMaterial.getCustomMaterial(stack);
                 if (cmat != null) cmat.onDefense(event, stack);
             }
-            if (event.getDamager() instanceof LivingEntity) {
-                LivingEntity le = (LivingEntity) event.getDamager();
+            if (event.getDamager() instanceof LivingEntity le) {
                 ItemStack chestplate = defendingPlayer.getEquipment().getChestplate();
                 if (Enchantments.hasEnchantment(chestplate, CustomEnchantment.Thorns)) {
                     le.damage(event.getDamage() * Enchantments.getLevelEnchantment(chestplate, CustomEnchantment.Thorns), defendingPlayer);
                 }
             }
-        }*/
+        }
     }
 
     @EventHandler(priority = EventPriority.NORMAL)
     public void OnInventoryClose(InventoryCloseEvent event) {
-        GuiHelper.clearInventoryStack(event.getPlayer().getUniqueId());
     }
 
     @EventHandler(priority = EventPriority.NORMAL)
@@ -289,10 +232,10 @@ public class CustomItemListener implements Listener {
     @EventHandler(priority = EventPriority.LOW)
     public void onPlayerDeathEvent(PlayerDeathEvent event) {
         HashMap<Integer, ItemStack> noDrop = new HashMap<>();
-
+        Player player = event.getEntity();
         /* Search and execute any enhancements */
-        for (int i = 0; i < event.getEntity().getInventory().getSize(); i++) {
-            ItemStack stack = event.getEntity().getInventory().getItem(i);
+        for (int i = 0; i < player.getInventory().getSize(); i++) {
+            ItemStack stack = player.getInventory().getItem(i);
             if (stack == null) continue;
 
             if (Enchantments.hasEnchantment(stack, CustomEnchantment.SoulBound)) {
@@ -305,7 +248,7 @@ public class CustomItemListener implements Listener {
         }
 
         /* Search for armor, apparently it doesnt show up in the normal inventory. */
-        ItemStack[] contents = event.getEntity().getInventory().getArmorContents();
+        ItemStack[] contents = player.getInventory().getArmorContents();
         for (int i = 0; i < contents.length; i++) {
             ItemStack stack = contents[i];
             if (stack == null) continue;
@@ -320,18 +263,16 @@ public class CustomItemListener implements Listener {
 
         }
 
-        // event.getEntity().getInventory().getArmorContents()
+        // player.getInventory().getArmorContents()
 
-        boolean keepInventory = Boolean.parseBoolean(event.getEntity().getWorld().getGameRuleValue("keepInventory"));
-        String playerName = event.getEntity().getName();
+        boolean keepInventory = Boolean.TRUE.equals(player.getWorld().getGameRuleValue(GameRule.KEEP_INVENTORY));
         if (!keepInventory) {
-            Task.syncDelayed(RCore.getInstance(), () -> {
-                Player player = Bukkit.getPlayer(playerName);
+            PluginHelper.sync().run(() -> {
                 PlayerInventory inv = player.getInventory();
-                    for (Integer slot : noDrop.keySet()) {
-                        ItemStack stack = noDrop.get(slot);
-                        inv.setItem(slot, stack);
-                    }
+                for (Integer slot : noDrop.keySet()) {
+                    ItemStack stack = noDrop.get(slot);
+                    inv.setItem(slot, stack);
+                }
             });
         }
 
@@ -390,37 +331,28 @@ public class CustomItemListener implements Listener {
 
         boolean result = false;
         switch (ia) {
-            case DROP_ALL_CURSOR:
-            case DROP_ONE_CURSOR:
+            case DROP_ALL_CURSOR, DROP_ONE_CURSOR -> {
                 otherStack = event.getCursor();
                 result = itemDrop(event, player, otherStack);
-                break;
-            case PICKUP_ALL: // Взять стак
-            case PICKUP_HALF:// Взять пол стака
-            case PICKUP_ONE: // Взять один
-            case PICKUP_SOME://
-            case COLLECT_TO_CURSOR: // Взять все что найду двойным кликом //TODO Отменить это опасное действие
-                result = itemFromInventory(event, player, clickInv, topInv, clickStack);
-                break;
-            case DROP_ALL_SLOT:
-            case DROP_ONE_SLOT:  // выбросить предмет
+            }
+            case PICKUP_ALL, PICKUP_HALF, PICKUP_ONE, PICKUP_SOME ->
+                    result = itemFromInventory(event, player, clickInv, topInv, clickStack);
+            case COLLECT_TO_CURSOR -> // Взять все что найду двойным кликом //TODO Отменить это опасное действие
+                    result = true;
+            case DROP_ALL_SLOT, DROP_ONE_SLOT -> {  // выбросить предмет
                 result = itemFromInventory(event, player, clickInv, topInv, clickStack);
                 if (result) break;
                 result = itemDrop(event, player, clickStack);
-                break;
-            case PLACE_ALL:  //
-            case PLACE_ONE:  // положить
-            case PLACE_SOME: //
-                otherStack = event.getCursor();
-                result = itemToInventory(event, player, clickInv, topInv, otherStack);
-                break;
-            case SWAP_WITH_CURSOR: // меняем то что в руке на то что в инвентаре
+            }
+            case PLACE_ALL, PLACE_ONE, PLACE_SOME -> //
+                    result = itemToInventory(event, player, clickInv, topInv, event.getCursor());
+            case SWAP_WITH_CURSOR -> { // меняем то что в руке на то что в инвентаре
                 otherStack = event.getCursor();
                 result = itemFromInventory(event, player, clickInv, topInv, clickStack);
                 if (result) break;
                 result = itemToInventory(event, player, clickInv, topInv, otherStack);
-                break;
-            case MOVE_TO_OTHER_INVENTORY:
+            }
+            case MOVE_TO_OTHER_INVENTORY -> {
                 InventoryView view = event.getView();
                 otherInv = view.getBottomInventory();
                 if (!view.getType().equals(InventoryType.CRAFTING)) {
@@ -432,21 +364,20 @@ public class CustomItemListener implements Listener {
                 result = itemFromInventory(event, player, clickInv, topInv, clickStack);
                 if (result) break;
                 result = itemToInventory(event, player, otherInv, topInv, clickStack);
-                break;
-            case HOTBAR_SWAP:
-            case HOTBAR_MOVE_AND_READD:
+            }
+            case HOTBAR_SWAP, HOTBAR_MOVE_AND_READD -> {
                 otherInv = event.getWhoClicked().getInventory();
                 otherStack = otherInv.getItem(event.getHotbarButton());
                 result = itemFromInventory(event, player, clickInv, topInv, clickStack);
                 if (result) break;
-                result = itemToInventory(event, player, otherInv, topInv, clickStack);
-                if (result) break;
                 result = itemFromInventory(event, player, otherInv, topInv, otherStack);
                 if (result) break;
+                result = itemToInventory(event, player, otherInv, topInv, clickStack);
+                if (result) break;
                 result = itemToInventory(event, player, clickInv, topInv, otherStack);
-                break;
-            default:
-                break;
+            }
+            default -> {
+            }
         }
         if (result) {
             event.setCancelled(true);
@@ -463,11 +394,10 @@ public class CustomItemListener implements Listener {
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onInventoryDrag(InventoryDragEvent event) {
         if (event.isCancelled()) return;
-        if (!(event.getWhoClicked() instanceof Player)) return;
-        Player player = (Player) event.getWhoClicked();
+        if (!(event.getWhoClicked() instanceof Player player)) return;
 
         ItemStack stack = event.getOldCursor();
-        if ((stack == null) || stack.getType().equals(Material.AIR)) return;
+        if (stack.getType().equals(Material.AIR)) return;
 
         Integer[] iSlots = event.getInventorySlots().toArray(new Integer[0]);
         Integer[] rSlots = event.getRawSlots().toArray(new Integer[0]);
